@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class Obstacle extends Element {
+
 	public enum TypeObstacle {
 		ROCHER(COULEUR_ROCHER), FORET(COULEUR_FORET), EAU(COULEUR_EAU);
 		public static TypeObstacle getObstacleAlea() {

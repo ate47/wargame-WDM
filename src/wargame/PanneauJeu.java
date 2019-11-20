@@ -95,7 +95,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		zoom(e.getX(), e.getY(), (float) e.getPreciseWheelRotation());
+		zoom(e.getX(), e.getY(), (float) -e.getPreciseWheelRotation());
 	}
 
 	private static final Color BACKGROUND = new Color(0x505050);
@@ -151,8 +151,6 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 			g.setFont(g.getFont().deriveFont(30F));
 			g.drawString("(" + id + "," + jd + ")", mouseX + 10, mouseY - 10);
 		}
-		g.setColor(Color.WHITE);
-		g.drawString(translateX + ", " + translateY + ", " + getUnitViewCount(), 0, 30);
 		repaint();
 	}
 }

@@ -1,28 +1,28 @@
 package wargame;
 
-import java.awt.Color;
-import java.awt.Graphics;
-
 public class Obstacle extends Element {
 
 	public enum TypeObstacle {
-		ROCHER(COULEUR_ROCHER), FORET(COULEUR_FORET), EAU(COULEUR_EAU);
+		ROCHER(new ImageAsset("rock0.png")), FORET(new ImageAsset("foret.png")), EAU(new ImageAsset("eau0.png"));
 		public static TypeObstacle getObstacleAlea() {
 			return values()[(int) (Math.random() * values().length)];
 		}
 
-		private final Color COULEUR;
+		private final ImageAsset IMAGE;
 
-		TypeObstacle(Color couleur) {
-			COULEUR = couleur;
+		TypeObstacle(ImageAsset image) {
+			IMAGE = image;
+		}
+		public ImageAsset getImage() {
+			return IMAGE;
 		}
 	}
 
 	private TypeObstacle TYPE;
 
-	Obstacle(TypeObstacle type, Position pos) {
+	public Obstacle(TypeObstacle type, Position pos) {
+		super(pos, type.IMAGE);
 		TYPE = type;
-		this.pos = pos;
 	}
 
 	public String toString() {

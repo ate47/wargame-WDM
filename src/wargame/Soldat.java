@@ -1,57 +1,50 @@
 package wargame;
 
-public class Soldat extends Element implements ISoldat{
-	
-	/*
-	 * (non-Javadoc)
-	 * @see wargame.ISoldat#combat(wargame.Soldat)
-	 */
+public class Soldat extends Element implements ISoldat {
+	private IType type;
+	private Position nextPosition;
+	private boolean joue;
+
+	public Soldat(IType type) {
+		super(type.getImage());
+		this.type = type;
+	}
+
+	public Soldat(Position pos, IType type) {
+		super(pos, type.getImage());
+		this.type = type;
+	}
+
+	@Override
+	public boolean aJoueCeTour() {
+		return joue;
+	}
+	public void annulerTour() {
+		joue = false;
+	}
+
+	@Override
 	public void combat(Soldat soldat) {
-		
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see wargame.ISoldat#getPoints()
-	 */
-	public int getPoints() {
-		
-		
-		return 1;	
+
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see wargame.ISoldat#getPortee()
-	 */
-	public int getPortee() {
-		
-		return 1;
+	@Override
+	public IType getType() {
+		return type;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see wargame.ISoldat#getTour()
-	 */
-	public int getTour() {
-		
-		return 1;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see wargame.ISoldat#joueTour(int)
-	 */
-	public void joueTour(int tour) {
-		
-		
+	@Override
+	public void joueTour() {
+		joue = false;
+		setPosition(nextPosition);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see wargame.ISoldat#seDeplace(wargame.Position)
-	 */
-	public void seDeplace(Position newPos) {
-		
-		
+	@Override
+	public void seDeplace(Position newPos) throws IllegalMoveException {
+		if (joue)
+			throw new IllegalMoveException();
+		nextPosition = newPos;
+		joue = true;
 	}
 
 }

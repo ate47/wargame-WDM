@@ -1,26 +1,84 @@
 package wargame;
 
-import java.awt.Graphics;
+import wargame.Carte.Case;
+import wargame.IType.Faction;
 
 public interface ICarte {
-	boolean actionHeros(Position pos, Position pos2);
+	interface ICase {
+		public boolean isVisible();
 
-	boolean deplaceSoldat(Position pos, Soldat soldat);
+		public void setVisible(boolean visible);
 
-	Element getElement(Position pos);
+		public boolean isVisite();
 
-	void jouerSoldats(PanneauJeu pj);
+		public void setVisite(boolean visite);
 
-	void mort(Soldat perso);
+		public Element getElement();
 
-	void toutDessiner(Graphics g);
+		public void setElement(Element e);
+	}
 
 	/**
-	 * Trouve aléatoirement un héros sur la carte
+	 * joue le soldat en pos1 en pos2
 	 * 
+	 * @param pos1 position du joueur
+	 * @param pos2 position ou jouer
+	 * @return si le coup est valide
+	 */
+	boolean joue(Position pos1, Position pos2);
+
+	/**
+	 * @param pos la position de l'élement
+	 * @return l'élement sur cette position
+	 */
+	default Element getElement(Position pos) {
+		return getElement(pos.getX(), pos.getY());
+	}
+
+	/**
+	 * retourne l'élement en position (posX, posY)
+	 * 
+	 * @param posX posX
+	 * @param posY posY
+	 * @return l'element ou null si absent
+	 */
+	Element getElement(int posX, int posY);
+
+	/**
+	 * retourne la case en position (posX, posY)
+	 * 
+	 * @param posX posX
+	 * @param posY posY
+	 * @return l'element ou null si absent
+	 */
+	ICase getCase(int posX, int posY);
+
+	/**
+	 * ajoute l'element e sur la carte
+	 * 
+	 * @param e l'element
+	 */
+	void ajouteElement(Element e);
+
+	/**
+	 * Joue tous les coups de ce tour
+	 */
+	void jouerSoldats();
+
+	/**
+	 * Tue un soldat
+	 * 
+	 * @param soldat le soldat
+	 */
+	void mort(Soldat soldat);
+
+	/**
+	 * Trouve aléatoirement un soldat de la faction f
+	 * 
+	 * @param f la faction a trouvé
 	 * @return le héros trouvé
 	 */
-	Heros trouveHeros();
+	Soldat trouveSoldat(Faction f);
 
 	/**
 	 * Trouve un héros choisi aléatoirement parmi les 8 positions adjacentes de pos
@@ -28,7 +86,7 @@ public interface ICarte {
 	 * @param pos la position ou chercher
 	 * @return le héros trouvé
 	 */
-	Heros trouveHeros(Position pos);
+	Soldat trouveSoldat(Position pos, Faction f);
 
 	/**
 	 * Trouve aléatoirement une position vide sur la carte
@@ -45,4 +103,19 @@ public interface ICarte {
 	 * @return la position
 	 */
 	Position trouvePositionVide(Position pos);
+
+	/**
+	 * @return
+	 */
+	PanneauJeu getPanneau();
+
+	/**
+	 * @return la largeur de la carte
+	 */
+	int getLargeur();
+
+	/**
+	 * @return la hauteur de la carte
+	 */
+	int getHauteur();
 }

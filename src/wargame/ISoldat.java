@@ -1,66 +1,39 @@
 package wargame;
 
 public interface ISoldat {
-	enum Faction {
-		BLANC, VERT;
-	}
 
-	static enum Type {
-		HUMAIN(40, 3, 10, 2, Faction.BLANC), 
-		NAIN(80, 1, 20, 0, Faction.BLANC), 
-		ELF(70, 5, 10, 6, Faction.BLANC),
-		HOBBIT(20, 3, 5, 2, Faction.BLANC),
-
-
-		TROLL(100, 1, 30, 0, Faction.VERT), 
-		ORC(40, 2, 10, 3, Faction.VERT), 
-		GOBELIN(20, 2, 5, 2, Faction.VERT);
-		
-		public static Type getTypeAlea() {
-			return values()[(int) (Math.random() * values().length)];
-		}
-
-		private final int POINTS_DE_VIE, PORTEE_VISUELLE, PUISSANCE, TIR;
-		private final Faction FACTION;
-
-		Type(int points, int portee, int puissance, int tir, Faction faction) {
-			POINTS_DE_VIE = points;
-			PORTEE_VISUELLE = portee;
-			PUISSANCE = puissance;
-			TIR = tir;
-			FACTION = faction;
-		}
-
-		public Faction getFaction() {
-			return FACTION;
-		}
-
-		public int getPoints() {
-			return POINTS_DE_VIE;
-		}
-
-		public int getPortee() {
-			return PORTEE_VISUELLE;
-		}
-
-		public int getPuissance() {
-			return PUISSANCE;
-		}
-
-		public int getTir() {
-			return TIR;
-		}
-	}
-
+	/**
+	 * Attaque un autre soldat
+	 * 
+	 * @param soldat le soldat
+	 */
 	void combat(Soldat soldat);
 
-	int getPoints();
+	/**
+	 * @return si le soldat a déjà été deplacé ce tour
+	 */
+	boolean aJoueCeTour();
 
-	int getPortee();
+	/**
+	 * @return le type du soldat
+	 */
+	IType getType();
 
-	int getTour();
+	/**
+	 * joue le tour du soldat
+	 */
+	void joueTour();
 
-	void joueTour(int tour);
+	/**
+	 * annule la demande d'action du soldat
+	 */
+	void annulerTour();
 
-	void seDeplace(Position newPos);
+	/**
+	 * demande un deplacement de ce soldat pour le prochain tour
+	 * 
+	 * @param newPos la nouvelle position
+	 * @throws IllegalMoveException si la position n'est pas valide
+	 */
+	void seDeplace(Position newPos) throws IllegalMoveException;
 }

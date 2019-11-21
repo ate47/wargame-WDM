@@ -95,9 +95,13 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		zoom(e.getX(), e.getY(), (float) e.getPreciseWheelRotation());
+		zoom(e.getX(), e.getY(), (float) -e.getPreciseWheelRotation());
 	}
 
+	public void lookAt(int x, int y) {
+		// TODO
+	}
+	
 	private static final Color BACKGROUND = new Color(0x505050);
 
 	@Override
@@ -126,9 +130,8 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 					y = (int) ((0.6666F * j) * unit);
 				}
 				if (c.isVisible()) {
-					if (e == null)
-						g.drawImage(GRASS.getImageFromPosition(i, j), x, y, unit - 2, unit - 2, this);
-					else
+					g.drawImage(GRASS.getImageFromPosition(i, j), x, y, unit - 2, unit - 2, this);
+					if (e != null)
 						g.drawImage(e.getSkin().getImageFromTime(), x, y, unit - 2, unit - 2, this);
 				} else if (c.isVisite()) {
 					if (e != null && e instanceof Obstacle)
@@ -148,11 +151,10 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		g.translate(-translateX, -translateY);
 		if (dedans) {
 			g.setColor(Color.WHITE);
-			g.setFont(g.getFont().deriveFont(30F));
 			g.drawString("(" + id + "," + jd + ")", mouseX + 10, mouseY - 10);
 		}
-		g.setColor(Color.WHITE);
-		g.drawString(translateX + ", " + translateY + ", " + getUnitViewCount(), 0, 30);
 		repaint();
+		g.setColor(Color.WHITE);
+		g.drawString(translateX + " " + translateY + " " + getUnit(), 0, 30);
 	}
 }

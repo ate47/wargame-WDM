@@ -118,4 +118,9 @@ public interface ICarte {
 	 * @return la hauteur de la carte
 	 */
 	int getHauteur();
+	
+	/**
+	 * génére une nouvelle carte aléatoirement
+	 */
+	void genererCarte();
 }

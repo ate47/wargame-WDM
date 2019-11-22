@@ -27,7 +27,7 @@ public class ImageAsset {
 	}
 
 	public Image getImageFromPosition(int x, int y) {
-		return images[(x * (y + 1)) % images.length];
+		return images[Math.abs((x * (y + 1)) % images.length)];
 	}
 
 	public Image getImageFromTime() {

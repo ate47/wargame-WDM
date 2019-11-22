@@ -16,6 +16,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	public static final ImageAsset HOVER = new ImageAsset("hover.png");
 	public static final ImageAsset INVISIBLE = new ImageAsset("brouillard_guerre0.png");
 	public static final ImageAsset VISITE = new ImageAsset("visite.png");
+	public static final ImageAsset INVISIBLE_HL = new ImageAsset("dark_brouillard_guerre.png");
 	private float zoom;
 	private int mouseX, mouseY;
 	private Point originDragPoint;
@@ -29,6 +30,8 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener(this);
+		setSize(800, 600);
+		lookAt(carte.getLargeur() / 2, carte.getHauteur() / 2);
 	}
 
 	public boolean isInHexa(int x, int y, int w, int h) {
@@ -57,9 +60,14 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	public void mouseDragged(MouseEvent e) {
 		if (originDragPoint != null) {
 			int unit = getUnit();
-			translateX = (float) (originTranslateX + (e.getX() - originDragPoint.getX()) / unit);
-			translateY = (float) (originTranslateY + (e.getY() - originDragPoint.getY()) / unit);
-			repaint();
+			float newTranslateX = (float) (originTranslateX + (e.getX() - originDragPoint.getX()) / unit);
+			float newTranslateY = (float) (originTranslateY + (e.getY() - originDragPoint.getY()) / unit);
+			if (!((newTranslateX <= 1) ^ (-newTranslateX + (float) getWidth() / unit <= carte.getLargeur() + 1.5F)))
+				translateX = newTranslateX;
+			
+			if (!((newTranslateY <= 1) ^ (-newTranslateY + (float) getHeight() / unit <= (carte.getHauteur() + 2) * 0.6666F)))
+				translateY = newTranslateY;
+			
 		}
 		mouseMoved(e);
 	}
@@ -77,7 +85,8 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 			originTranslateX = translateX;
 			originTranslateY = translateY;
 			originDragPoint = e.getPoint();
-		}
+		} else
+			originDragPoint = null;
 	}
 
 	@Override
@@ -86,9 +95,18 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	}
 
 	public void zoom(int mouseX, int mouseY, float factor) {
-		float newZoom = Math.max(zoom + factor / 10F, 1);
+		float newZoom = Math.max(zoom + factor / 10F, 1F);
+		float centerX = mouseX;
+		float centerY = mouseY;
 
+		int unit = getUnit();
+		float centerOfZoomX = -this.translateX + centerX / unit;
+		float centerOfZoomY = -this.translateY + centerY / unit;
+		
 		zoom = newZoom;
+		int newUnit = getUnit();
+		this.translateX = -centerOfZoomX + centerX / newUnit;
+		this.translateY = -centerOfZoomY + centerY / newUnit;
 
 		repaint();
 	}
@@ -99,9 +117,16 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	}
 
 	public void lookAt(int x, int y) {
-		// TODO
+		int unit = getUnit();
+		if (y % 2 == 0) {
+			translateX = -(x - (float) getWidth() / unit / 2);
+			translateY = -0.6666F * (y - (float) getHeight() / unit / 2);
+		} else {
+			translateX = -0.5000F - (x - (float) getWidth() / unit / 2);
+			translateY = -0.6666F * (y - (float) getHeight() / unit / 2);
+		}
 	}
-	
+
 	private static final Color BACKGROUND = new Color(0x505050);
 
 	@Override
@@ -113,15 +138,21 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		int unit = getUnit();
 		int translateX = (int) (this.translateX * unit);
 		int translateY = (int) (this.translateY * unit);
+		int translateXStart = -(int) this.translateX - 2;
+		int translateXEnd = (int) (translateXStart + getWidth() * 1F / unit) + 4;
+		int translateYStart = -(int) (this.translateY / 0.6666F) - 2;
+		int translateYEnd = (int) (translateYStart + getHeight() / 0.6666F / unit) + 4;
 		g.translate(translateX, translateY);
 		boolean dedans = false;
 		int id = 0, jd = 0;
-		for (int i = 0; i < carte.getLargeur(); i++)
-			for (int j = 0; j < carte.getHauteur(); j++) {
+		ICase c;
+		Element e;
+		carte.setHoveredCase(null);
+		for (int i = translateXStart; i < translateXEnd; i++)
+			for (int j = translateYStart; j < translateYEnd; j++) {
 				int x;
 				int y;
-				ICase c = carte.getCase(i, j);
-				Element e = c.getElement();
+				c = carte.getCase(i, j);
 				if (j % 2 == 0) {
 					x = i * unit;
 					y = (int) ((0.6666F * j) * unit);
@@ -129,32 +160,37 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 					x = (int) ((0.5000F + i) * unit);
 					y = (int) ((0.6666F * j) * unit);
 				}
+				if (c == null) {
+					g.drawImage(INVISIBLE_HL.getImageFromPosition(i, j), x, y, unit, unit, this);
+					continue;
+				}
+				e = c.getElement();
 				if (c.isVisible()) {
-					g.drawImage(GRASS.getImageFromPosition(i, j), x, y, unit - 2, unit - 2, this);
-					if (e != null)
-						g.drawImage(e.getSkin().getImageFromTime(), x, y, unit - 2, unit - 2, this);
+					if (e != null) { // Obstacle ou soldat
+						if (!(e instanceof Obstacle))
+							g.drawImage(GRASS.getImageFromPosition(i, j), x, y, unit, unit, this);
+						g.drawImage(e.getSkin().getImageFromTime(), x, y, unit, unit, this);
+					} else
+						g.drawImage(GRASS.getImageFromPosition(i, j), x, y, unit, unit, this);
 				} else if (c.isVisite()) {
 					if (e != null && e instanceof Obstacle)
-						g.drawImage(e.getSkin().getImageFromTime(), x, y, unit - 2, unit - 2, this);
+						g.drawImage(e.getSkin().getImageFromTime(), x, y, unit, unit, this);
 					else
-						g.drawImage(GRASS.getImageFromPosition(i, j), x, y, unit - 2, unit - 2, this);
-					g.drawImage(VISITE.getImageFromPosition(i, j), x, y, unit - 2, unit - 2, this);
+						g.drawImage(GRASS.getImageFromPosition(i, j), x, y, unit, unit, this);
+					g.drawImage(VISITE.getImageFromPosition(i, j), x, y, unit, unit, this);
 				} else
-					g.drawImage(INVISIBLE.getImageFromPosition(i, j), x, y, unit - 2, unit - 2, this);
-				if (!dedans && isInHexa(translateX + x, translateY + y, unit - 2, unit - 2)) {
+					g.drawImage(INVISIBLE.getImageFromPosition(i, j), x, y, unit, unit, this);
+				if (!dedans && isInHexa(translateX + x, translateY + y, unit, unit)) {
 					dedans = true;
-					id = i;
-					jd = j;
-					g.drawImage(HOVER.getImages()[0], x, y, unit - 2, unit - 2, this);
+					carte.setHoveredCase(c);
+					g.drawImage(HOVER.getImages()[0], x, y, unit, unit, this);
 				}
 			}
 		g.translate(-translateX, -translateY);
 		if (dedans) {
 			g.setColor(Color.WHITE);
-			g.drawString("(" + id + "," + jd + ")", mouseX + 10, mouseY - 10);
+			g.drawString("("+ id + ", " + jd+")", mouseX + 10, mouseY - 10);
 		}
 		repaint();
-		g.setColor(Color.WHITE);
-		g.drawString(translateX + " " + translateY + " " + getUnit(), 0, 30);
 	}
 }

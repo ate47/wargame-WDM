@@ -6,7 +6,7 @@ import java.util.List;
 import wargame.IType.Faction;
 
 public class Carte implements ICarte {
-	public class Case implements ICase {
+	public static class Case implements ICase {
 		private boolean visible, visite;
 		private Element e;
 		
@@ -41,6 +41,7 @@ public class Carte implements ICarte {
 	private List<Soldat> soldatEnAttente = new ArrayList<>();
 	private Faction factionJoueur;
 	private Case[][] carte;
+	private ICase hoveredCase;
 	
 	public Carte(int sx, int sy, Faction factionJoueur) {
 		this.sx = sx;
@@ -64,6 +65,7 @@ public class Carte implements ICarte {
 		return getCase(posX, posY).getElement();
 	}
 	
+	@Override
 	public Case getCase(int posX, int posY) {
 		if (posX < 0 || posX >= carte.length || posY < 0 || posY >= carte[posX].length)
 			return null;
@@ -72,7 +74,6 @@ public class Carte implements ICarte {
 	
 	@Override
 	public void genererCarte() {
-		Position p;
 		int i;
 		
 		for (i = 0; i < IConfig.NB_OBSTACLES; i++)
@@ -144,8 +145,7 @@ public class Carte implements ICarte {
 	
 	@Override
 	public Soldat trouveSoldat(Faction f) {
-		// TODO Auto-generated method stub
-		return null;
+		return soldatJoueur.get((int) (soldatJoueur.size() * Math.random()));
 	}
 	
 	@Override
@@ -168,7 +168,20 @@ public class Carte implements ICarte {
 			}
 		}
 	}
-	
+	/**
+	 * @param hoveredCase the hoveredCase to set
+	 */
+	public void setHoveredCase(ICase hoveredCase) {
+		this.hoveredCase = hoveredCase;
+	}
+
+	/**
+	 * @return the hoveredCase
+	 */
+	public ICase getHoveredCase() {
+		return hoveredCase;
+	}
+
 	@Override
 	public Position trouvePositionVide(Position pos) {
 		// TODO Auto-generated method stub

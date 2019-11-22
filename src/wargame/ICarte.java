@@ -1,6 +1,5 @@
 package wargame;
 
-import wargame.Carte.Case;
 import wargame.IType.Faction;
 
 public interface ICarte {
@@ -123,4 +122,13 @@ public interface ICarte {
 	 * génére une nouvelle carte aléatoirement
 	 */
 	void genererCarte();
+	/**
+	 * @param hoveredCase the hoveredCase to set
+	 */
+	void setHoveredCase(ICase hoveredCase);
+	
+	/**
+	 * @return the hoveredCase
+	 */
+	ICase getHoveredCase();
 }

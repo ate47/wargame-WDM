@@ -8,15 +8,20 @@ public class Position implements IConfig {
 		this.y = y;
 	}
 
-	public boolean estValide() {
-		if (x < 0 || x >= LARGEUR_CARTE || y < 0 || y >= HAUTEUR_CARTE)
-			return false;
-		else
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-	}
-
-	public boolean estVoisine(Position pos) {
-		return ((Math.abs(x - pos.x) <= 1) && (Math.abs(y - pos.y) <= 1));
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Position other = (Position) obj;
+		if (x != other.x)
+			return false;
+		if (y != other.y)
+			return false;
+		return true;
 	}
 
 	public int getX() {
@@ -25,14 +30,6 @@ public class Position implements IConfig {
 
 	public int getY() {
 		return y;
-	}
-
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	public void setY(int y) {
-		this.y = y;
 	}
 
 	public String toString() {

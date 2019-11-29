@@ -17,6 +17,8 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	public static final ImageAsset INVISIBLE = new ImageAsset("brouillard_guerre0.png");
 	public static final ImageAsset VISITE = new ImageAsset("visite.png");
 	public static final ImageAsset INVISIBLE_HL = new ImageAsset("dark_brouillard_guerre.png");
+	public static final ImageAsset INACCESSIBLE = new ImageAsset("inaccessible.png");
+	
 	private float zoom;
 	private int mouseX, mouseY;
 	private Point originDragPoint;
@@ -64,10 +66,11 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 			float newTranslateY = (float) (originTranslateY + (e.getY() - originDragPoint.getY()) / unit);
 			if (!((newTranslateX <= 1) ^ (-newTranslateX + (float) getWidth() / unit <= carte.getLargeur() + 1.5F)))
 				translateX = newTranslateX;
-			
-			if (!((newTranslateY <= 1) ^ (-newTranslateY + (float) getHeight() / unit <= (carte.getHauteur() + 2) * 0.6666F)))
+
+			if (!((newTranslateY <= 1)
+					^ (-newTranslateY + (float) getHeight() / unit <= (carte.getHauteur() + 2) * 0.6666F)))
 				translateY = newTranslateY;
-			
+
 		}
 		mouseMoved(e);
 	}
@@ -85,8 +88,13 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 			originTranslateX = translateX;
 			originTranslateY = translateY;
 			originDragPoint = e.getPoint();
-		} else
-			originDragPoint = null;
+			return;
+		}
+		originDragPoint = null;
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			if (carte.getHoveredCase() != null)
+				carte.getHoveredCase().click();
+		}
 	}
 
 	@Override
@@ -102,7 +110,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		int unit = getUnit();
 		float centerOfZoomX = -this.translateX + centerX / unit;
 		float centerOfZoomY = -this.translateY + centerY / unit;
-		
+
 		zoom = newZoom;
 		int newUnit = getUnit();
 		this.translateX = -centerOfZoomX + centerX / newUnit;
@@ -144,7 +152,6 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		int translateYEnd = (int) (translateYStart + getHeight() / 0.6666F / unit) + 4;
 		g.translate(translateX, translateY);
 		boolean dedans = false;
-		int id = 0, jd = 0;
 		ICase c;
 		Element e;
 		carte.setHoveredCase(null);
@@ -180,6 +187,10 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 					g.drawImage(VISITE.getImageFromPosition(i, j), x, y, unit, unit, this);
 				} else
 					g.drawImage(INVISIBLE.getImageFromPosition(i, j), x, y, unit, unit, this);
+				
+				if (carte.getSoldatClick() != null && !c.isAccessible())
+					g.drawImage(INACCESSIBLE.getImageFromPosition(i, j), x, y, unit, unit, this);
+				
 				if (!dedans && isInHexa(translateX + x, translateY + y, unit, unit)) {
 					dedans = true;
 					carte.setHoveredCase(c);
@@ -187,10 +198,6 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 				}
 			}
 		g.translate(-translateX, -translateY);
-		if (dedans) {
-			g.setColor(Color.WHITE);
-			g.drawString("("+ id + ", " + jd+")", mouseX + 10, mouseY - 10);
-		}
 		repaint();
 	}
 }

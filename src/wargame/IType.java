@@ -70,8 +70,8 @@ public interface IType {
 	
 	public enum TypeMauvais implements IType {
 		TROLL(100, 1, 30, 0, "testmauvais.png"),
-		ORC(40, 2, 10, 3, "testmauvais.png"),
-		GOBELIN(20, 2, 5, 2, "testmauvais.png");
+		ORC(40, 3, 10, 3, "testmauvais.png"),
+		GOBELIN(20, 3, 5, 2, "testmauvais.png");
 		
 		private ImageAsset image;
 		private final int POINTS_DE_VIE, PORTEE_VISUELLE, PUISSANCE, TIR;

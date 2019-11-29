@@ -1,30 +1,31 @@
 package wargame;
 
+import wargame.Carte.Case;
 import wargame.IType.Faction;
 
 public interface ICarte {
 	interface ICase {
-		public boolean isVisible();
 
-		public void setVisible(boolean visible);
+		boolean isAccessible();
 
-		public boolean isVisite();
+		boolean isVisible();
 
-		public void setVisite(boolean visite);
+		void setVisible(boolean visible);
 
-		public Element getElement();
+		boolean isVisite();
 
-		public void setElement(Element e);
+		void setVisite(boolean visite);
+
+		Element getElement();
+
+		void setElement(Element e);
+
+		int getX();
+
+		int getY();
+
+		void click();
 	}
-
-	/**
-	 * joue le soldat en pos1 en pos2
-	 * 
-	 * @param pos1 position du joueur
-	 * @param pos2 position ou jouer
-	 * @return si le coup est valide
-	 */
-	boolean joue(Position pos1, Position pos2);
 
 	/**
 	 * @param pos la position de l'élement
@@ -33,6 +34,16 @@ public interface ICarte {
 	default Element getElement(Position pos) {
 		return getElement(pos.getX(), pos.getY());
 	}
+
+	Soldat getSoldatClick();
+
+	Case[] getVisibles();
+
+	int nombreVisible(int portee);
+
+	Case[] visible(int x, int y, int portee);
+
+	Case[] visible(int x, int y, int portee, Case[] cases);
 
 	/**
 	 * retourne l'élement en position (posX, posY)
@@ -117,18 +128,21 @@ public interface ICarte {
 	 * @return la hauteur de la carte
 	 */
 	int getHauteur();
-	
+
 	/**
 	 * génére une nouvelle carte aléatoirement
 	 */
 	void genererCarte();
+
 	/**
 	 * @param hoveredCase the hoveredCase to set
 	 */
 	void setHoveredCase(ICase hoveredCase);
-	
+
 	/**
 	 * @return the hoveredCase
 	 */
 	ICase getHoveredCase();
+
+	void clickSurPosition(int x, int y);
 }

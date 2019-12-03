@@ -337,7 +337,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 					g.setColor(Color.YELLOW);
 				else
 					g.setColor(Color.GREEN);
-				g.fillRect(oldX + unit / 7, oldY + unit / 9 + 1, (int) (percentage * unit * 5 / 7), 7 * unit / 9);
+				g.fillRect(oldX + unit / 7, oldY + unit / 10 + 1, (int) (percentage * unit * 5 / 7), unit / 10 - 2);
 			}
 
 		g.translate(-translateX, -translateY);

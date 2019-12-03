@@ -111,8 +111,7 @@ public class Wargame implements ICarte {
 			} else if (e == null && accessible) {
 				try {
 					soldat.seDeplace(this);
-				} catch (IllegalMoveException e1) {
-				}
+				} catch (IllegalMoveException e1) {}
 				for (Case c : visibles)
 					if (c != null)
 						c.accessible = false;
@@ -392,14 +391,13 @@ public class Wargame implements ICarte {
 		for (Soldat s : soldatJoueur)
 			s.joueTour();
 
-		for (ISoldat s : soldatJoueur) {
-			for (Case c : visible(s.getPosition().getX(), s.getPosition().getY(), s.getType().getPorteeVisuelle()))
-				if (c != null) {
-					c.setVisible(true);
-					c.setVisite(true);
-				}
-
-		}
+		for (ISoldat s : soldatJoueur)
+			if (!s.estMort())
+				for (Case c : visible(s.getPosition().getX(), s.getPosition().getY(), s.getType().getPorteeVisuelle()))
+					if (c != null) {
+						c.setVisible(true);
+						c.setVisite(true);
+					}
 		panneau.repaint();
 	}
 

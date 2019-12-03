@@ -36,7 +36,9 @@ public class Soldat extends Element implements ISoldat {
 	@Override
 	public void combat(ISoldat soldat) {
 		int des;
-		
+		if (soldat.estMort())
+			return;
+
 		// coup
 		des = (int) (Math.random() * this.getType().getPuissance());
 
@@ -86,9 +88,11 @@ public class Soldat extends Element implements ISoldat {
 	public void joueTour() {
 		switch (mouvement) {
 		case DEPLACEMENT:
-			getPosition().setElement(null);
-			setPosition(nextPosition);
-			getPosition().setElement(this);
+			if (nextPosition.getElement() == null) {
+				getPosition().setElement(null);
+				setPosition(nextPosition);
+				getPosition().setElement(this);
+			}
 			break;
 		case COMBAT:
 			combat(cible);

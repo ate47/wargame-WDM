@@ -12,7 +12,7 @@ public interface ISoldat {
 	 * 
 	 * @param soldat le soldat
 	 */
-	void combat(Soldat soldat);
+	void combat(ISoldat soldat);
 
 	/**
 	 * @return si le soldat a déjà été deplacé ce tour

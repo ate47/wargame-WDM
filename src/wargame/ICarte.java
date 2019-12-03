@@ -1,9 +1,7 @@
 package wargame;
 
-import java.util.List;
-
-import wargame.Wargame.Case;
 import wargame.IType.Faction;
+import wargame.Wargame.Case;
 
 /**
  * Represente une carte de jeu
@@ -156,17 +154,20 @@ public interface ICarte {
 	 * @return le soldat cliqué (null si aucun n'a été cliqué)
 	 */
 	Soldat getSoldatClick();
-
-	/**
-	 * @return la liste des soldats qui sont en attente de jeu
-	 */
-	List<ISoldat> getSoldatEnAttente();
-
+	
 	/**
 	 * @return les cases visibles pour le soldat cliqué
 	 */
 	Case[] getVisibles();
 
+	/**
+	 * @return le tableau des soldats du Joueur.
+	 */
+	ISoldat[] getSoldatJoueur();
+	/**
+	 * @return le tableau des soldats de l'ennemi.
+	 */
+	ISoldat[] getSoldatEnnemis();
 	/**
 	 * Joue tous les coups de ce tour
 	 */

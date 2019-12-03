@@ -1,10 +1,12 @@
 package wargame;
 
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import wargame.IType.Faction;
@@ -44,7 +46,6 @@ public class Wargame implements ICarte {
 			this.y = y;
 		}
 
-
 		public Element getElement() {
 			return e;
 		}
@@ -71,6 +72,8 @@ public class Wargame implements ICarte {
 
 		public void setElement(Element e) {
 			this.e = e;
+			if (e != null)
+				e.setPosition(this);
 		}
 
 		public void setVisible(boolean visible) {
@@ -113,7 +116,7 @@ public class Wargame implements ICarte {
 				for (Case c : visibles)
 					if (c != null)
 						c.accessible = false;
-				soldatEnAttente.add(soldat);
+
 				soldat = null;
 				visibles = null;
 			} else if (e != null && e.getPosition().equals(soldat.getPosition())) {
@@ -124,14 +127,13 @@ public class Wargame implements ICarte {
 				visibles = null;
 			} else if (e != null && e instanceof Soldat) {
 				Soldat s = (Soldat) e;
-				if (s.getType().getFaction() == factionEnnemy) {
+				if (s.getType().getFaction() == factionEnnemi) {
 					try {
 						soldat.seBat(s);
 					} catch (IllegalMoveException e1) {
-						// TODO Bloc catch généré automatiquement
 						e1.printStackTrace();
 					}
-					soldatEnAttente.add(soldat);
+
 					soldat = null;
 					s = null;
 					visibles = null;
@@ -149,20 +151,31 @@ public class Wargame implements ICarte {
 	private FakeGameDrawer fakeGameDrawer;
 	private JFrame frame;
 	private int sx, sy;
-	private List<ISoldat> soldatJoueur = new ArrayList<>();
-	private List<ISoldat> soldatEnAttente = new ArrayList<>();
+	private Soldat[] soldatJoueur;
+	private Soldat[] soldatEnnemis;
 	private Faction factionJoueur;
-	private Faction factionEnnemy;
+	private Faction factionEnnemi;
 	private Case[][] carte;
 	private ICase hoveredCase;
 	private Case[] visibles;
 	private Soldat soldat;
+	private JButton finTour;
 
 	public Wargame(int sx, int sy, Faction factionJoueur) {
 		frame = new JFrame("Wargame");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationByPlatform(true);
 		frame.setSize(800, 600);
+
+		finTour = new MenuButton("Fin de tour");
+		finTour.setPreferredSize(new Dimension(200, 60));
+		finTour.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				jouerSoldats();
+			}
+		});
 
 		this.sx = sx;
 		this.sy = sy;
@@ -175,6 +188,7 @@ public class Wargame implements ICarte {
 
 		panneau = new PanneauJeu(this);
 		panneau.setPreferredSize(frame.getSize());
+		panneau.add(finTour);
 
 		menu = new MenuJeu(this);
 		menu.setPreferredSize(frame.getSize());
@@ -182,7 +196,7 @@ public class Wargame implements ICarte {
 		frame.setContentPane(menu);
 
 		this.factionJoueur = factionJoueur;
-		factionEnnemy = factionJoueur.getOthers();
+		factionEnnemi = factionJoueur.getOthers();
 
 		try {
 			frame.setIconImage(ImageIO.read(Wargame.class.getResourceAsStream("ico.png")));
@@ -196,11 +210,6 @@ public class Wargame implements ICarte {
 		Case c = carte[x][y];
 		c.setElement(e);
 		e.setPosition(c);
-		if (e instanceof Soldat) {
-			Soldat s = (Soldat) e;
-			if (((Soldat) e).getType().getFaction() == factionJoueur)
-				soldatJoueur.add(s);
-		}
 	}
 
 	@Override
@@ -240,12 +249,11 @@ public class Wargame implements ICarte {
 
 		}
 
-		// for (i = 0; i < factionJoueur.nombreGenere(); i++)
-		// ajouteElement(xmin, ymin, xmax, ymax),
-		// new Soldat(trouvePositionVide(factionJoueur.getRandomElement()));
+		soldatJoueur = new Soldat[factionJoueur.nombreGenere()];
 
-		ajouteElement(10, 11, new Soldat(factionJoueur.getRandomElement()));
-		ajouteElement(10, 10, new Soldat(factionJoueur.getRandomElement()));
+		for (i = 0; i < factionJoueur.nombreGenere(); i++)
+			trouvePositionVide(xmin, ymin, xmax, ymax)
+					.setElement(soldatJoueur[i] = new Soldat(factionJoueur.getRandomElement()));
 
 		panneau.lookAt((xmax + xmin) / 2, (ymax + ymin) / 2);
 
@@ -278,11 +286,12 @@ public class Wargame implements ICarte {
 			break;
 
 		}
-		// for (i = 0; i < factionEnnemy.nombreGenere(); i++)
-		// ajouteElement(new Soldat(trouvePositionVide(xmin, ymin, xmax, ymax),
-		// factionEnnemy.getRandomElement()));
 
-		ajouteElement(11, 11, new Soldat(factionEnnemy.getRandomElement()));
+		soldatEnnemis = new Soldat[factionEnnemi.nombreGenere()];
+
+		for (i = 0; i < factionEnnemi.nombreGenere(); i++)
+			trouvePositionVide(xmin, ymin, xmax, ymax)
+					.setElement(soldatEnnemis[i] = new Soldat(factionEnnemi.getRandomElement()));
 
 		jouerSoldats();
 	}
@@ -378,8 +387,9 @@ public class Wargame implements ICarte {
 		for (i = 0; i < carte.length; i++)
 			for (j = 0; j < carte[i].length; j++)
 				carte[i][j].setVisible(false);
+
 		// 0 le BrG
-		for (ISoldat s : soldatEnAttente)
+		for (Soldat s : soldatJoueur)
 			s.joueTour();
 
 		for (ISoldat s : soldatJoueur) {
@@ -390,7 +400,6 @@ public class Wargame implements ICarte {
 				}
 
 		}
-		soldatEnAttente.clear();
 		panneau.repaint();
 	}
 
@@ -461,7 +470,7 @@ public class Wargame implements ICarte {
 
 	@Override
 	public ISoldat trouveSoldat(Faction f) {
-		return soldatJoueur.get((int) (soldatJoueur.size() * Math.random()));
+		return soldatJoueur[(int) (soldatJoueur.length * Math.random())];
 	}
 
 	@Override
@@ -471,13 +480,18 @@ public class Wargame implements ICarte {
 	}
 
 	@Override
-	public List<ISoldat> getSoldatEnAttente() {
-		return soldatEnAttente;
+	public Case[] getVisibles() {
+		return visibles;
 	}
 
 	@Override
-	public Case[] getVisibles() {
-		return visibles;
+	public Soldat[] getSoldatJoueur() {
+		return soldatJoueur;
+	}
+
+	@Override
+	public ISoldat[] getSoldatEnnemis() {
+		return soldatEnnemis;
 	}
 
 }

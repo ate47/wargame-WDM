@@ -25,6 +25,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 	public static final ImageAsset OPT_REGEN = new ImageAsset("regen.png");
 
 	public static final Color BACKGROUND = new Color(0x505050);
+
 	public static void dessinerFleche(Graphics g, int ox, int oy, int dx, int dy, int taille) {
 		int x, y;
 		double norme, angle;
@@ -36,7 +37,6 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 
 		angle = (Math.asin(y / norme) < 0 ? -1 : 1) * Math.acos(x / norme);
 
-		g.setColor(Color.RED);
 		g.drawLine(ox, oy, dx, dy);
 		g.fillOval(ox - 5, oy - 5, 10, 10);
 
@@ -49,6 +49,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 
 		g.drawLine(dx, dy, x, y);
 	}
+
 	private float zoom;
 	private int mouseX, mouseY;
 	private Point originDragPoint;
@@ -94,14 +95,15 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 	public void keyPressed(KeyEvent e) {
 		System.out.println(KeyEvent.VK_ESCAPE);
 		System.out.println(e.getKeyCode());
-		if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			carte.getFrame().setContentPane(carte.getMenu());
 			carte.getFrame().pack();
 		}
 	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {}
+	public void keyReleased(KeyEvent e) {
+	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
@@ -250,9 +252,10 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 					g.drawImage(HOVER.getImages()[0], x, y, unit, unit, this);
 				}
 			}
-		for (ISoldat s : carte.getSoldatEnAttente()) {
-			switch (s.getProchainMouvement()) {
-			case DEPLACEMENT:
+
+
+		for (ISoldat s : carte.getSoldatJoueur())
+			if (!s.estMort()) {
 				x = s.getPosition().getX();
 				y = s.getPosition().getY();
 				if (y % 2 == 0) {
@@ -262,25 +265,57 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 					oldX = (int) ((0.5000F + x) * unit);
 					oldY = (int) ((0.6666F * y) * unit);
 				}
-				x = s.getNextPosition().getX();
-				y = s.getNextPosition().getY();
-				if (y % 2 == 0) {
-					newX = x * unit;
-					newY = (int) ((0.6666F * y) * unit);
-				} else {
-					newX = (int) ((0.5000F + x) * unit);
-					newY = (int) ((0.6666F * y) * unit);
+				switch (s.getProchainMouvement()) {
+				case DEPLACEMENT:
+					x = s.getNextPosition().getX();
+					y = s.getNextPosition().getY();
+					if (y % 2 == 0) {
+						newX = x * unit;
+						newY = (int) ((0.6666F * y) * unit);
+					} else {
+						newX = (int) ((0.5000F + x) * unit);
+						newY = (int) ((0.6666F * y) * unit);
+					}
+					g.setColor(Color.BLUE);
+					dessinerFleche(g, oldX + unit / 2, oldY + unit / 2, newX + unit / 2, newY + unit / 2, unit / 4);
+					break;
+				case RIEN:
+					if (x >= translateXStart && x < translateXEnd && y >= translateYStart && y < translateYEnd
+							&& s.getVie() < s.getType().getPointsDeVie())
+						g.drawImage(OPT_REGEN.getImageFromPosition(x, y), oldX, oldY, unit, unit, this);
+					break;
+				case COMBAT:
+					x = s.getCible().getPosition().getX();
+					y = s.getCible().getPosition().getY();
+					if (y % 2 == 0) {
+						newX = x * unit;
+						newY = (int) ((0.6666F * y) * unit);
+					} else {
+						newX = (int) ((0.5000F + x) * unit);
+						newY = (int) ((0.6666F * y) * unit);
+					}
+					g.setColor(Color.RED);
+					dessinerFleche(g, oldX + unit / 2, oldY + unit / 2, newX + unit / 2, newY + unit / 2, unit / 4);
+					break;
+
+				default:
+					break;
 				}
-				g.setColor(Color.red);
-				dessinerFleche(g, oldX + unit / 2, oldY + unit / 2, newX + unit / 2, newY + unit / 2, unit / 4);
-				break;
-			case RIEN:
-				x = s.getPosition().getX();
-				y = s.getPosition().getY();
-				if (x >= translateXStart && x < translateXEnd && y >= translateYStart && y < translateYEnd)
-					g.drawImage(OPT_REGEN.getImageFromPosition(x, y), x, y, unit, unit, this);
-				break;
-			case COMBAT:
+				g.setColor(Color.DARK_GRAY);
+				g.fillRect(oldX + unit / 8, oldY + unit / 10, unit * 6 / 8, unit / 10);
+				float percentage = (float) s.getVie() / s.getType().getPointsDeVie();
+				if (percentage < .25F)
+					g.setColor(Color.RED);
+				else if (percentage < .50F)
+					g.setColor(Color.ORANGE);
+				else if (percentage < .75F)
+					g.setColor(Color.YELLOW);
+				else
+					g.setColor(Color.GREEN);
+				g.fillRect(oldX + unit / 7, oldY + unit / 10 + 1, (int) (percentage * unit * 5 / 7), unit / 10 - 2);
+			}
+		for (ISoldat s : carte.getSoldatEnnemis())
+			if (!s.estMort() && s.getPosition().isVisible()) {
 				x = s.getPosition().getX();
 				y = s.getPosition().getY();
 				if (y % 2 == 0) {
@@ -290,24 +325,21 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 					oldX = (int) ((0.5000F + x) * unit);
 					oldY = (int) ((0.6666F * y) * unit);
 				}
-				x = s.getCible().getPosition().getX();
-				y = s.getCible().getPosition().getY();
-				if (y % 2 == 0) {
-					newX = x * unit;
-					newY = (int) ((0.6666F * y) * unit);
-				} else {
-					newX = (int) ((0.5000F + x) * unit);
-					newY = (int) ((0.6666F * y) * unit);
-				}
-				g.setColor(Color.red);
-				dessinerFleche(g, oldX + unit / 2, oldY + unit / 2, newX + unit / 2, newY + unit / 2, unit / 4);
-				break;
-				
-			default:
-				break;
+
+				g.setColor(Color.DARK_GRAY);
+				g.fillRect(oldX + unit / 8, oldY + unit / 10, unit * 6 / 8, unit / 10);
+				float percentage = (float) s.getVie() / s.getType().getPointsDeVie();
+				if (percentage < .25F)
+					g.setColor(Color.RED);
+				else if (percentage < .50F)
+					g.setColor(Color.ORANGE);
+				else if (percentage < .75F)
+					g.setColor(Color.YELLOW);
+				else
+					g.setColor(Color.GREEN);
+				g.fillRect(oldX + unit / 7, oldY + unit / 9 + 1, (int) (percentage * unit * 5 / 7), 7 * unit / 9);
 			}
 
-		}
 		g.translate(-translateX, -translateY);
 		repaint();
 	}

@@ -3,23 +3,20 @@ package wargame;
 import wargame.ICarte.ICase;
 
 public class Soldat extends Element implements ISoldat {
-	public static boolean rechercheSequentielle(ICase[] tableau, Soldat element){
-		for(ICase c : tableau) {
-			if(c.getElement().equals(element))
+	public static boolean rechercheSequentielle(ICase[] tableau, Soldat element) {
+		for (ICase c : tableau) {
+			if (element.equals(c.getElement()))
 				return true;
 		}
 		return false;
 	}
-	
+
 	private int vie;
 	private IType type;
 	private ICase nextPosition;
 	private Soldat cible;
-	private SoldatProchainMouvement mouvement = SoldatProchainMouvement.RIEN;
 
-	public SoldatProchainMouvement getProchainMouvement() {
-		return mouvement;
-	}
+	private SoldatProchainMouvement mouvement = SoldatProchainMouvement.RIEN;
 
 	public Soldat(IType type) {
 		super(type.getImage());
@@ -37,29 +34,42 @@ public class Soldat extends Element implements ISoldat {
 	}
 
 	@Override
-	public void combat(Soldat soldat) {
+	public void combat(ISoldat soldat) {
 		int des;
-		Wargame.ICase[] visibles;
 		
-		//coup
-		des = (int) (Math.random() * this.getType().getPuissance() );
-		
-		soldat.setVie(soldat.getVie() - des);
-		
+		// coup
+		des = (int) (Math.random() * this.getType().getPuissance());
+
+		soldat.setVie(Math.max(0, soldat.getVie() - des));
+
 		// Riposte
-		if(soldat.getVie() > 0) {
-			visibles = getPosition().visible(soldat.getType().getTir());
-			if(rechercheSequentielle(visibles, this)){
-				des = (int) (Math.random() * (soldat.getType().getPuissance() / 2));
-				this.setVie(this.getVie() - des);
-			}
+		if (!soldat.estMort()) {
+			des = 0;
+			if (rechercheSequentielle(getPosition().visible(1), this))
+				des = (int) (Math.random() * soldat.getType().getPuissance());
+			else if (rechercheSequentielle(getPosition().visible(soldat.getType().getPorteeVisuelle()), this))
+				des = (int) (Math.random() * soldat.getType().getTir());
+			this.setVie(Math.max(0, this.getVie() - des));
 		}
 	}
-	
-	public void mort() {
-		this.getPosition().setElement(null);
-		setPosition(null);
-		vie = 0;
+
+	@Override
+	public boolean estMort() {
+		return vie == 0;
+	}
+
+	@Override
+	public Soldat getCible() {
+		return cible;
+	}
+
+	@Override
+	public ICase getNextPosition() {
+		return nextPosition;
+	}
+
+	public SoldatProchainMouvement getProchainMouvement() {
+		return mouvement;
 	}
 
 	@Override
@@ -67,32 +77,42 @@ public class Soldat extends Element implements ISoldat {
 		return type;
 	}
 
-	
+	@Override
+	public int getVie() {
+		return vie;
+	}
+
 	@Override
 	public void joueTour() {
 		switch (mouvement) {
 		case DEPLACEMENT:
+			getPosition().setElement(null);
 			setPosition(nextPosition);
-			break;
-		case RIEN:
-			setVie(Math.min(getVie() + IConfig.VIE_PAR_REGEN, getType().getPointsDeVie()));
+			getPosition().setElement(this);
 			break;
 		case COMBAT:
 			combat(cible);
+			break;
+		case RIEN:
 		default:
-			return;
+			setVie(Math.min(getVie() + IConfig.VIE_PAR_REGEN, getType().getPointsDeVie()));
+			break;
 		}
 		mouvement = SoldatProchainMouvement.RIEN;
 	}
 
-	@Override
-	public void setVie(int vie) {
-		this.vie = vie;
+	public void mort() {
+		this.getPosition().setElement(null);
+		setPosition(null);
+		vie = 0;
 	}
 
 	@Override
-	public int getVie() {
-		return vie;
+	public void seBat(Soldat enemi) throws IllegalMoveException {
+		if (mouvement != SoldatProchainMouvement.RIEN)
+			throw new IllegalMoveException();
+		cible = enemi;
+		mouvement = SoldatProchainMouvement.COMBAT;
 	}
 
 	@Override
@@ -102,14 +122,6 @@ public class Soldat extends Element implements ISoldat {
 		nextPosition = newPos;
 		mouvement = SoldatProchainMouvement.DEPLACEMENT;
 	}
-	
-	@Override
-	public void seBat(Soldat enemi) throws IllegalMoveException{
-		if(mouvement != SoldatProchainMouvement.RIEN)
-			throw new IllegalMoveException();
-		cible = enemi;
-		mouvement = SoldatProchainMouvement.COMBAT;
-	}
 
 	@Override
 	public void seRegen() throws IllegalMoveException {
@@ -117,20 +129,12 @@ public class Soldat extends Element implements ISoldat {
 			throw new IllegalMoveException();
 		mouvement = SoldatProchainMouvement.RIEN;
 	}
-	
+
 	@Override
-	public ICase getNextPosition() {
-		return nextPosition;
-	}
-	
-	@Override
-	public Soldat getCible() {
-		return cible;
-	}
-	
-	@Override
-	public boolean estMort() {
-		return vie == 0;
+	public void setVie(int vie) {
+		this.vie = vie;
+		if (this.vie == 0)
+			mort();
 	}
 
 }

@@ -1,21 +1,22 @@
 package wargame;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Rectangle2D;
 
 import javax.swing.JButton;
 
+import wargame.utils.WargameUtils;
+
 public class MenuButton extends JButton implements MouseListener {
-	public static void drawCenter(Graphics g, int x, int y, String s) {
-		Rectangle2D text = g.getFontMetrics(g.getFont()).getStringBounds(s, g);
-		g.drawString(s, x - (int) (text.getWidth() / 2), y - 6 + (int) (text.getHeight() / 2));
-	}
+
 	private static final long serialVersionUID = 1175305120107911940L;
-	private static final Color BACKGROUND = new Color(0x444444);
+	private static final Color FOREGROUND_HOVER = new Color(0);
 	private static final Color FOREGROUND = new Color(0xDDDDDD);
+	private static final ImageAsset BUTTON_IMAGE = new ImageAsset("button.png");
+	private static final ImageAsset BUTTON_IMAGE_HOVER = new ImageAsset("button_hover.png");
 	private boolean mouseIn = false;
 
 	public MenuButton(String texte) {
@@ -47,21 +48,16 @@ public class MenuButton extends JButton implements MouseListener {
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		Color a = BACKGROUND;
-		Color b = FOREGROUND;
-		if (!mouseIn)
-			g.setColor(a);
-		else
-			g.setColor(b);
-		
-		g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
-		
-		if (mouseIn)
-			g.setColor(a);
-		else
-			g.setColor(b);
-		g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
-		g.setFont(g.getFont().deriveFont((float) (getHeight() / 4)));
-		drawCenter(g, getWidth() / 2, getHeight() / 2, getText());
+		if (mouseIn) {
+			g.drawImage((BUTTON_IMAGE_HOVER).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
+			g.setColor(FOREGROUND_HOVER);
+		} else {
+			g.drawImage((BUTTON_IMAGE).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
+			g.setColor(FOREGROUND);
+		}
+		Font old = getFont();
+		g.setFont(old.deriveFont((float) (getHeight() / 4)));
+		WargameUtils.drawCenter(g, getWidth() / 2, getHeight() / 2, getText());
+		g.setFont(old);
 	}
 }

@@ -18,43 +18,6 @@ public class Wargame implements ICarte {
 			super(x, y);
 		}
 
-		public Element getElement() {
-			return e;
-		}
-
-		public boolean isVisible() {
-			return visible;
-		}
-
-		public boolean isVisite() {
-			return visite;
-		}
-
-		public boolean isAccessible() {
-			return accessible;
-		}
-
-		public void setAccessible(boolean accessible) {
-			this.accessible = accessible;
-		}
-
-		public void setElement(Element e) {
-			this.e = e;
-		}
-
-		public void setVisible(boolean visible) {
-			this.visible = visible;
-		}
-
-		public void setVisite(boolean visite) {
-			this.visite = visite;
-		}
-
-		@Override
-		public String toString() {
-			return "Case [visible=" + visible + ", visite=" + visite + ", e=" + e + "]";
-		}
-
 		@Override
 		public void click() {
 			if (soldat == null) {
@@ -95,10 +58,48 @@ public class Wargame implements ICarte {
 			}
 		}
 
+		public Element getElement() {
+			return e;
+		}
+
+		public boolean isAccessible() {
+			return accessible;
+		}
+
+		public boolean isVisible() {
+			return visible;
+		}
+
+		public boolean isVisite() {
+			return visite;
+		}
+
+		public void setAccessible(boolean accessible) {
+			this.accessible = accessible;
+		}
+
+		public void setElement(Element e) {
+			this.e = e;
+		}
+
+		public void setVisible(boolean visible) {
+			this.visible = visible;
+		}
+
+		public void setVisite(boolean visite) {
+			this.visite = visite;
+		}
+
+		@Override
+		public String toString() {
+			return "Case [visible=" + visible + ", visite=" + visite + ", e=" + e + "]";
+		}
+
 	}
 
 	private PanneauJeu panneau;
 	private MenuJeu menu;
+	private FakeGameDrawer fakeGameDrawer;
 	private JFrame frame;
 	private int sx, sy;
 	private List<ISoldat> soldatJoueur = new ArrayList<>();
@@ -111,7 +112,6 @@ public class Wargame implements ICarte {
 	private Soldat soldat;
 
 	public Wargame(int sx, int sy, Faction factionJoueur) {
-
 		frame = new JFrame("Wargame");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationByPlatform(true);
@@ -124,12 +124,14 @@ public class Wargame implements ICarte {
 			for (int j = 0; j < carte[i].length; j++)
 				carte[i][j] = this.new Case(i, j);
 
+		fakeGameDrawer = new FakeGameDrawer();
+
 		panneau = new PanneauJeu(this);
 		panneau.setPreferredSize(frame.getSize());
 
 		menu = new MenuJeu(this);
 		menu.setPreferredSize(frame.getSize());
-		
+
 		frame.setContentPane(menu);
 
 		this.factionJoueur = factionJoueur;
@@ -150,16 +152,6 @@ public class Wargame implements ICarte {
 			if (((Soldat) e).getType().getFaction() == factionJoueur)
 				soldatJoueur.add(s);
 		}
-	}
-
-	@Override
-	public Soldat getSoldatClick() {
-		return soldat;
-	}
-
-	@Override
-	public Case[] getVisibles() {
-		return visibles;
 	}
 
 	@Override
@@ -238,10 +230,6 @@ public class Wargame implements ICarte {
 		jouerSoldats();
 	}
 
-	public List<ISoldat> getSoldatEnAttente() {
-		return soldatEnAttente;
-	}
-
 	@Override
 	public Case getCase(int posX, int posY) {
 		if (posX < 0 || posX >= carte.length || posY < 0 || posY >= carte[posX].length)
@@ -252,6 +240,20 @@ public class Wargame implements ICarte {
 	@Override
 	public Element getElement(int posX, int posY) {
 		return getCase(posX, posY).getElement();
+	}
+
+	/**
+	 * @return le dessinateur de faux jeu
+	 */
+	public FakeGameDrawer getFakeGameDrawer() {
+		return fakeGameDrawer;
+	}
+
+	/**
+	 * @return la fenetre du jeu
+	 */
+	public JFrame getFrame() {
+		return frame;
 	}
 
 	@Override
@@ -271,8 +273,8 @@ public class Wargame implements ICarte {
 		return sx;
 	}
 
-	public JFrame getFrame() {
-		return frame;
+	public MenuJeu getMenu() {
+		return menu;
 	}
 
 	@Override
@@ -280,35 +282,18 @@ public class Wargame implements ICarte {
 		return panneau;
 	}
 
-	public int nombreVisible(int portee) {
-		return 3 * portee * (portee + 1) + 1;
+	@Override
+	public Soldat getSoldatClick() {
+		return soldat;
 	}
 
-	public Case[] visible(int x, int y, int portee) {
-		Case[] cases = new Case[nombreVisible(portee)];
-		return visible(x, y, portee, cases);
+	public List<ISoldat> getSoldatEnAttente() {
+		return soldatEnAttente;
 	}
 
-	public Case[] visible(int x, int y, int portee, Case[] cases) {
-		int i, j, k, l = 0, decalage;
-		decalage = 2 * ((y + portee + 1) % 2) - 1;
-
-		// milieu
-		for (i = 0; i <= portee; i++)
-			for (j = -portee; j <= portee; j++)
-				cases[l++] = getCase(x + decalage * (i - portee / 2), y + j);
-
-		// droite
-		for (i = portee / 2 + 1 + (portee % 2), k = portee * 2 - 3; k > 0; k -= 4, i++)
-			for (j = -k / 2; j <= k / 2; j++)
-				cases[l++] = getCase(x + decalage * i, y + j);
-
-		// gauche
-		for (i = portee / 2 + 1, k = portee * 2 - 1; k > 0; k -= 4, i++)
-			for (j = -k / 2; j <= k / 2; j++)
-				cases[l++] = getCase(x - decalage * i, y + j);
-
-		return cases;
+	@Override
+	public Case[] getVisibles() {
+		return visibles;
 	}
 
 	@Override
@@ -339,9 +324,12 @@ public class Wargame implements ICarte {
 
 	}
 
-	/**
-	 * @param hoveredCase the hoveredCase to set
-	 */
+	@Override
+	public int nombreVisible(int portee) {
+		return 3 * portee * (portee + 1) + 1;
+	}
+
+	@Override
 	public void setHoveredCase(ICase hoveredCase) {
 		this.hoveredCase = hoveredCase;
 	}
@@ -361,6 +349,15 @@ public class Wargame implements ICarte {
 		}
 	}
 
+	/**
+	 * trouve une position vide dans un rectangle(xmin, ymin, xmax, ymax)
+	 * 
+	 * @param xmin coord x du haut gauche du rectangle
+	 * @param ymin coord y du haut gauche du rectangle
+	 * @param xmax coord x du bas droit du rectangle
+	 * @param ymax coord y du bas droit du rectangle
+	 * @return
+	 */
 	public Position trouvePositionVide(int xmin, int ymin, int xmax, int ymax) {
 		int x, y;
 		Case c;
@@ -393,8 +390,31 @@ public class Wargame implements ICarte {
 		return null;
 	}
 
-	public MenuJeu getMenu() {
-		return menu;
+	public Case[] visible(int x, int y, int portee) {
+		Case[] cases = new Case[nombreVisible(portee)];
+		return visible(x, y, portee, cases);
+	}
+
+	public Case[] visible(int x, int y, int portee, Case[] cases) {
+		int i, j, k, l = 0, decalage;
+		decalage = 2 * ((y + portee + 1) % 2) - 1;
+
+		// milieu
+		for (i = 0; i <= portee; i++)
+			for (j = -portee; j <= portee; j++)
+				cases[l++] = getCase(x + decalage * (i - portee / 2), y + j);
+
+		// droite
+		for (i = portee / 2 + 1 + (portee % 2), k = portee * 2 - 3; k > 0; k -= 4, i++)
+			for (j = -k / 2; j <= k / 2; j++)
+				cases[l++] = getCase(x + decalage * i, y + j);
+
+		// gauche
+		for (i = portee / 2 + 1, k = portee * 2 - 1; k > 0; k -= 4, i++)
+			for (j = -k / 2; j <= k / 2; j++)
+				cases[l++] = getCase(x - decalage * i, y + j);
+
+		return cases;
 	}
 
 }

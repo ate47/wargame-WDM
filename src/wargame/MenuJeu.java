@@ -11,9 +11,11 @@ import javax.swing.JPanel;
 public class MenuJeu extends JPanel {
 	private static final ImageAsset LOGO = new ImageAsset("logo.png");
 	private static final long serialVersionUID = 4058740506271457913L;
+	private Wargame jeu;
 
 	public MenuJeu(Wargame jeu) {
 		super(null);
+		this.jeu = jeu;
 		JButton nvPartie = new MenuButton("Nouvelle Partie");
 		JButton sauvegarder = new MenuButton("Sauvegarder la partie");
 		JButton charger = new MenuButton("Charger une partie");
@@ -86,11 +88,13 @@ public class MenuJeu extends JPanel {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		jeu.getFakeGameDrawer().paintComponent(g, getWidth(), getHeight());
 		int sizeX = getWidth() / 3;
 		int sizeY = sizeX * 2 / 5;
 		int decalage = getHeight() / 50;
 		g.drawImage(LOGO.getImageFromTime(), (getWidth() - sizeX) / 2, getHeight() / 3 - (sizeY + decalage), sizeX,
 				sizeY, this);
+		repaint();
 	}
 
 }

@@ -24,11 +24,38 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 	public static final ImageAsset INACCESSIBLE = new ImageAsset("inaccessible.png");
 	public static final ImageAsset OPT_REGEN = new ImageAsset("regen.png");
 
+	public static final Color BACKGROUND = new Color(0x505050);
+	public static void dessinerFleche(Graphics g, int ox, int oy, int dx, int dy, int taille) {
+		int x, y;
+		double norme, angle;
+
+		x = dx - ox;
+		y = dy - oy;
+		norme = Math.sqrt(x * x + y * y);
+		// != 0 par construction
+
+		angle = (Math.asin(y / norme) < 0 ? -1 : 1) * Math.acos(x / norme);
+
+		g.setColor(Color.RED);
+		g.drawLine(ox, oy, dx, dy);
+		g.fillOval(ox - 5, oy - 5, 10, 10);
+
+		x = dx + (int) (Math.cos(angle + 5 * Math.PI / 4) * taille);
+		y = dy + (int) (Math.sin(angle + 5 * Math.PI / 4) * taille);
+
+		g.drawLine(dx, dy, x, y);
+		x = dx + (int) (Math.cos(angle + 3 * Math.PI / 4) * taille);
+		y = dy + (int) (Math.sin(angle + 3 * Math.PI / 4) * taille);
+
+		g.drawLine(dx, dy, x, y);
+	}
 	private float zoom;
 	private int mouseX, mouseY;
 	private Point originDragPoint;
 	private float translateX, translateY;
+
 	private float originTranslateX, originTranslateY;
+
 	private Wargame carte;
 
 	public PanneauJeu(Wargame carte) {
@@ -39,6 +66,14 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		addMouseWheelListener(this);
 		addKeyListener(this);
 		setSize(800, 600);
+	}
+
+	public int getUnit() {
+		return (int) (Math.min(getWidth(), getHeight()) / getUnitViewCount());
+	}
+
+	public float getUnitViewCount() {
+		return Math.max(carte.getLargeur(), carte.getHauteur()) / zoom;
 	}
 
 	public boolean isInHexa(int x, int y, int w, int h) {
@@ -55,12 +90,32 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		return false;
 	}
 
-	public float getUnitViewCount() {
-		return Math.max(carte.getLargeur(), carte.getHauteur()) / zoom;
+	@Override
+	public void keyPressed(KeyEvent e) {
+		System.out.println(KeyEvent.VK_ESCAPE);
+		System.out.println(e.getKeyCode());
+		if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+			carte.getFrame().setContentPane(carte.getMenu());
+			carte.getFrame().pack();
+		}
 	}
 
-	public int getUnit() {
-		return (int) (Math.min(getWidth(), getHeight()) / getUnitViewCount());
+	@Override
+	public void keyReleased(KeyEvent e) {}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+	}
+
+	public void lookAt(int x, int y) {
+		int unit = getUnit();
+		if (y % 2 == 0) {
+			translateX = -(x - (float) getWidth() / unit / 2);
+			translateY = -0.6666F * (y - (float) getHeight() / unit / 2);
+		} else {
+			translateX = -0.5000F - (x - (float) getWidth() / unit / 2);
+			translateY = -0.6666F * (y - (float) getHeight() / unit / 2);
+		}
 	}
 
 	@Override
@@ -107,6 +162,11 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		originDragPoint = null;
 	}
 
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		zoom(e.getX(), e.getY(), (float) -e.getPreciseWheelRotation());
+	}
+
 	public void zoom(int mouseX, int mouseY, float factor) {
 		float newZoom = Math.max(zoom + factor / 10F, 1F);
 		float centerX = mouseX;
@@ -122,49 +182,6 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		this.translateY = -centerOfZoomY + centerY / newUnit;
 
 		repaint();
-	}
-
-	@Override
-	public void mouseWheelMoved(MouseWheelEvent e) {
-		zoom(e.getX(), e.getY(), (float) -e.getPreciseWheelRotation());
-	}
-
-	public void lookAt(int x, int y) {
-		int unit = getUnit();
-		if (y % 2 == 0) {
-			translateX = -(x - (float) getWidth() / unit / 2);
-			translateY = -0.6666F * (y - (float) getHeight() / unit / 2);
-		} else {
-			translateX = -0.5000F - (x - (float) getWidth() / unit / 2);
-			translateY = -0.6666F * (y - (float) getHeight() / unit / 2);
-		}
-	}
-
-	private static final Color BACKGROUND = new Color(0x505050);
-
-	public static void dessinerFleche(Graphics g, int ox, int oy, int dx, int dy, int taille) {
-		int x, y;
-		double norme, angle;
-
-		x = dx - ox;
-		y = dy - oy;
-		norme = Math.sqrt(x * x + y * y);
-		// != 0 par construction
-
-		angle = (Math.asin(y / norme) < 0 ? -1 : 1) * Math.acos(x / norme);
-
-		g.setColor(Color.RED);
-		g.drawLine(ox, oy, dx, dy);
-		g.fillOval(ox - 5, oy - 5, 10, 10);
-
-		x = dx + (int) (Math.cos(angle + 5 * Math.PI / 4) * taille);
-		y = dy + (int) (Math.sin(angle + 5 * Math.PI / 4) * taille);
-
-		g.drawLine(dx, dy, x, y);
-		x = dx + (int) (Math.cos(angle + 3 * Math.PI / 4) * taille);
-		y = dy + (int) (Math.sin(angle + 3 * Math.PI / 4) * taille);
-
-		g.drawLine(dx, dy, x, y);
 	}
 
 	@Override
@@ -270,22 +287,5 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		}
 		g.translate(-translateX, -translateY);
 		repaint();
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		System.out.println(KeyEvent.VK_ESCAPE);
-		System.out.println(e.getKeyCode());
-		if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
-			carte.getFrame().setContentPane(carte.getMenu());
-			carte.getFrame().pack();
-		}
 	}
 }

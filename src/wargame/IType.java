@@ -8,17 +8,27 @@ public interface IType {
 	 * Represente une faction pour un soldat
 	 */
 	public enum Faction {
-		BLANC(TypeBon.values(), IConfig.NB_HEROS), VERT(TypeMauvais.values(), IConfig.NB_MONSTRES);
+		BLANC(TypeBon.values(), IConfig.NB_HEROS, "faction/faction_blanc.png"),
+		VERT(TypeMauvais.values(), IConfig.NB_MONSTRES, "faction/faction_vert.png");
 		public static Faction getRandomFaction() {
 			return values()[(int) (Math.random() * values().length)];
 		}
 
 		private IType[] values;
+		private ImageAsset icon;
 		private int nombreGenere;
 
-		Faction(IType[] values, int nombreGenere) {
+		Faction(IType[] values, int nombreGenere, String icon) {
 			this.values = values;
 			this.nombreGenere = nombreGenere;
+			this.icon = new ImageAsset(icon);
+		}
+
+		/**
+		 * @return l'icone de la faction
+		 */
+		public ImageAsset getIcon() {
+			return icon;
 		}
 
 		/**
@@ -36,6 +46,16 @@ public interface IType {
 			return values[(int) (Math.random() * values.length)];
 		}
 
+		/**
+		 * @return le tableau des types de soldats pour cette faction
+		 */
+		public IType[] getTypes() {
+			return values;
+		}
+
+		/**
+		 * @return le nombre d'élement a généré pour un jeu normal
+		 */
 		public int nombreGenere() {
 			return nombreGenere;
 		}
@@ -45,8 +65,8 @@ public interface IType {
 	 * Represente un {@link IType} pour la faction {@link Faction#BLANC}
 	 */
 	public enum TypeBon implements IType {
-		HUMAIN(40, 3, 10, 2, "testbon.png"), NAIN(80, 1, 20, 0, "testbon.png"), ELF(70, 5, 10, 6, "testbon.png"),
-		HOBBIT(20, 3, 5, 2, "testbon.png");
+		HUMAIN(40, 3, 10, 2, "soldat/blanc_humain.png"), NAIN(80, 1, 20, 0, "soldat/blanc_nain.png"),
+		ELF(70, 5, 10, 6, "soldat/blanc_elf.png"), HOBBIT(20, 3, 5, 2, "soldat/blanc_hobbit.png");
 
 		private ImageAsset image;
 		private final int POINTS_DE_VIE, PORTEE_VISUELLE, PUISSANCE, TIR;
@@ -89,15 +109,15 @@ public interface IType {
 		public int getTir() {
 			return TIR;
 		}
-		
+
 	}
 
 	/**
 	 * Represente un {@link IType} pour la faction {@link Faction#VERT}
 	 */
 	public enum TypeMauvais implements IType {
-		TROLL(100, 1, 30, 0, "testmauvais.png"), ORC(40, 3, 10, 3, "testmauvais.png"),
-		GOBELIN(20, 3, 5, 2, "testmauvais.png");
+		TROLL(100, 1, 30, 0, "soldat/vert_troll.png"), ORC(40, 3, 10, 3, "soldat/vert_orc.png"),
+		GOBELIN(20, 3, 5, 2, "soldat/vert_gobelin.png");
 
 		private ImageAsset image;
 		private final int POINTS_DE_VIE, PORTEE_VISUELLE, PUISSANCE, TIR;

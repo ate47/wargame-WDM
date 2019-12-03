@@ -263,6 +263,29 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 				if (x >= translateXStart && x < translateXEnd && y >= translateYStart && y < translateYEnd)
 					g.drawImage(OPT_REGEN.getImageFromPosition(x, y), x, y, unit, unit, this);
 				break;
+			case COMBAT:
+				x = s.getPosition().getX();
+				y = s.getPosition().getY();
+				if (y % 2 == 0) {
+					oldX = x * unit;
+					oldY = (int) ((0.6666F * y) * unit);
+				} else {
+					oldX = (int) ((0.5000F + x) * unit);
+					oldY = (int) ((0.6666F * y) * unit);
+				}
+				x = s.getCible().getPosition().getX();
+				y = s.getCible().getPosition().getY();
+				if (y % 2 == 0) {
+					newX = x * unit;
+					newY = (int) ((0.6666F * y) * unit);
+				} else {
+					newX = (int) ((0.5000F + x) * unit);
+					newY = (int) ((0.6666F * y) * unit);
+				}
+				g.setColor(Color.red);
+				dessinerFleche(g, oldX + unit / 2, oldY + unit / 2, newX + unit / 2, newY + unit / 2, unit / 4);
+				break;
+				
 			default:
 				break;
 			}

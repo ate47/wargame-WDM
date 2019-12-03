@@ -20,12 +20,12 @@ public class Obstacle extends Element {
 
 	private TypeObstacle TYPE;
 	
-	public Obstacle(TypeObstacle type, Position pos) {
-		super(pos, type.IMAGE);
+	public Obstacle(TypeObstacle type) {
+		super(type.getImage());
 		TYPE = type;
 	}
-	public Obstacle(Position pos) {
-		this(TypeObstacle.getObstacleAlea(), pos);
+	public Obstacle() {
+		this(TypeObstacle.getObstacleAlea());
 	}
 
 	public String toString() {

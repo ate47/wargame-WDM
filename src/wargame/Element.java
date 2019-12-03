@@ -1,19 +1,14 @@
 package wargame;
 
+import wargame.ICarte.ICase;
+
 public class Element {
 	private ImageAsset asset;
-	private Position position;
+	private ICase position;
 
-	/**
-	 * Constructeur de l'élement qui lui donne aleatoirement des coordonnees
-	 */
+
+
 	public Element(ImageAsset asset) {
-		this(new Position((int) Math.random() * IConfig.LARGEUR_CARTE,
-				(int) Math.random() * IConfig.HAUTEUR_CARTE), asset);
-	}
-
-	public Element(Position pos, ImageAsset asset) {
-		this.position = pos;
 		this.asset = asset;
 	}
 
@@ -21,14 +16,14 @@ public class Element {
 	 * definir la position de l'element
 	 * @param position la position
 	 */
-	public void setPosition(Position position) {
+	public void setPosition(ICase position) {
 		this.position = position;
 	}
 
 	/**
 	 * @return la position de l'element
 	 */
-	public Position getPosition() {
+	public ICase getPosition() {
 		return position;
 	}
 	

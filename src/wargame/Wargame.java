@@ -10,68 +10,59 @@ import javax.swing.JFrame;
 import wargame.IType.Faction;
 
 public class Wargame implements ICarte {
-	public class Case extends Position implements ICase {
+	public class Case implements ICase {
 		private boolean visible, visite, accessible;
 		private Element e;
-
-		public Case(int x, int y) {
-			super(x, y);
-		}
+		private int x, y;
 
 		@Override
-		public void click() {
-			if (soldat == null) {
-				if (e != null && e instanceof Soldat) {
-					Soldat s = (Soldat) e;
-					if (s.getType().getFaction() == factionJoueur && !s.aJoueCeTour()) {
-						System.out.println(s.getType());
-						soldat = s;
-						visibles = visible(getX(), getY(), Math.max(s.getType().getTir(), 1));
-						for (Case v : visibles)
-							if (v != null)
-								v.accessible = true;
-					}
-				} else {
-					for (Case c : visible(getX(), getY(), 4))
-						if (c != null)
-							c.setVisible(true);
-				}
-			} else if (e == null && accessible) {
-				try {
-					soldat.seDeplace(this);
-				} catch (IllegalMoveException e1) {}
-				for (Case c : visibles)
-					if (c != null)
-						c.accessible = false;
-				soldatEnAttente.add(soldat);
-				soldat = null;
-				visibles = null;
-			} else if (e != null && e.getPosition().equals(soldat.getPosition())) {
-				for (Case c : visibles)
-					if (c != null)
-						c.accessible = false;
-				soldat = null;
-				visibles = null;
-			} else {
-				System.err.println("Mauvais emplacement");
-				// TODO: afficher erreur
-			}
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Case other = (Case) obj;
+			if (x != other.x)
+				return false;
+			if (y != other.y)
+				return false;
+			return true;
 		}
+
+		public int getX() {
+			return x;
+		}
+
+		public int getY() {
+			return y;
+		}
+
+		public Case(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+
 
 		public Element getElement() {
 			return e;
-		}
-
-		public boolean isAccessible() {
-			return accessible;
 		}
 
 		public boolean isVisible() {
 			return visible;
 		}
 
+		public Case[] visible(int portee) {
+			return Wargame.this.visible(getX(), getY(), portee);
+		}
+
 		public boolean isVisite() {
 			return visite;
+		}
+
+		public boolean isAccessible() {
+			return accessible;
 		}
 
 		public void setAccessible(boolean accessible) {
@@ -95,6 +86,62 @@ public class Wargame implements ICarte {
 			return "Case [visible=" + visible + ", visite=" + visite + ", e=" + e + "]";
 		}
 
+		@Override
+		public void click() {
+			if (soldat == null) {
+				if (e != null && (e instanceof Soldat)) {
+					Soldat s = (Soldat) e;
+					if (s.getType().getFaction() == factionJoueur) {
+						if (s.aJoueCeTour())
+							s.annulerTour();
+						soldat = s;
+						visibles = visible(Math.max(s.getType().getTir(), 1));
+						for (Case v : visibles)
+							if (v != null)
+								v.accessible = true;
+					}
+				} else {
+					for (Case c : visible(4))
+						if (c != null)
+							c.setVisible(true);
+				}
+			} else if (e == null && accessible) {
+				try {
+					soldat.seDeplace(this);
+				} catch (IllegalMoveException e1) {
+				}
+				for (Case c : visibles)
+					if (c != null)
+						c.accessible = false;
+				soldatEnAttente.add(soldat);
+				soldat = null;
+				visibles = null;
+			} else if (e != null && e.getPosition().equals(soldat.getPosition())) {
+				for (Case c : visibles)
+					if (c != null)
+						c.accessible = false;
+				soldat = null;
+				visibles = null;
+			} else if (e != null && e instanceof Soldat) {
+				Soldat s = (Soldat) e;
+				if (s.getType().getFaction() == factionEnnemy) {
+					try {
+						soldat.seBat(s);
+					} catch (IllegalMoveException e1) {
+						// TODO Bloc catch généré automatiquement
+						e1.printStackTrace();
+					}
+					soldatEnAttente.add(soldat);
+					soldat = null;
+					s = null;
+					visibles = null;
+				}
+			} else {
+				System.err.println("Mauvais emplacement");
+				// TODO: afficher erreur
+			}
+
+		}
 	}
 
 	private PanneauJeu panneau;
@@ -145,8 +192,10 @@ public class Wargame implements ICarte {
 	}
 
 	@Override
-	public void ajouteElement(Element e) {
-		carte[e.getPosition().getX()][e.getPosition().getY()].setElement(e);
+	public void ajouteElement(int x, int y, Element e) {
+		Case c = carte[x][y];
+		c.setElement(e);
+		e.setPosition(c);
 		if (e instanceof Soldat) {
 			Soldat s = (Soldat) e;
 			if (((Soldat) e).getType().getFaction() == factionJoueur)
@@ -159,7 +208,7 @@ public class Wargame implements ICarte {
 		int i, carre, xmin, ymin, xmax, ymax;
 
 		for (i = 0; i < IConfig.NB_OBSTACLES; i++)
-			ajouteElement(new Obstacle(trouvePositionVide()));
+			trouvePositionVide().setElement(new Obstacle());
 
 		carre = (int) (Math.random() * 4);
 		switch (carre) {
@@ -190,8 +239,13 @@ public class Wargame implements ICarte {
 			break;
 
 		}
-		for (i = 0; i < factionJoueur.nombreGenere(); i++)
-			ajouteElement(new Soldat(trouvePositionVide(xmin, ymin, xmax, ymax), factionJoueur.getRandomElement()));
+
+		// for (i = 0; i < factionJoueur.nombreGenere(); i++)
+		// ajouteElement(xmin, ymin, xmax, ymax),
+		// new Soldat(trouvePositionVide(factionJoueur.getRandomElement()));
+
+		ajouteElement(10, 11, new Soldat(factionJoueur.getRandomElement()));
+		ajouteElement(10, 10, new Soldat(factionJoueur.getRandomElement()));
 
 		panneau.lookAt((xmax + xmin) / 2, (ymax + ymin) / 2);
 
@@ -224,8 +278,11 @@ public class Wargame implements ICarte {
 			break;
 
 		}
-		for (i = 0; i < factionEnnemy.nombreGenere(); i++)
-			ajouteElement(new Soldat(trouvePositionVide(xmin, ymin, xmax, ymax), factionEnnemy.getRandomElement()));
+		// for (i = 0; i < factionEnnemy.nombreGenere(); i++)
+		// ajouteElement(new Soldat(trouvePositionVide(xmin, ymin, xmax, ymax),
+		// factionEnnemy.getRandomElement()));
+
+		ajouteElement(11, 11, new Soldat(factionEnnemy.getRandomElement()));
 
 		jouerSoldats();
 	}
@@ -287,13 +344,32 @@ public class Wargame implements ICarte {
 		return soldat;
 	}
 
-	public List<ISoldat> getSoldatEnAttente() {
-		return soldatEnAttente;
+	public Case[] visible(int x, int y, int portee) {
+		Case[] cases = new Case[nombreVisible(portee)];
+		return (Case[]) visible(x, y, portee, cases);
 	}
 
 	@Override
-	public Case[] getVisibles() {
-		return visibles;
+	public ICase[] visible(int x, int y, int portee, ICase[] cases) {
+		int i, j, k, l = 0, decalage;
+		decalage = 2 * ((y + portee + 1) % 2) - 1;
+
+		// milieu
+		for (i = 0; i <= portee; i++)
+			for (j = -portee; j <= portee; j++)
+				cases[l++] = getCase(x + decalage * (i - portee / 2), y + j);
+
+		// droite
+		for (i = portee / 2 + 1 + (portee % 2), k = portee * 2 - 3; k > 0; k -= 4, i++)
+			for (j = -k / 2; j <= k / 2; j++)
+				cases[l++] = getCase(x + decalage * i, y + j);
+
+		// gauche
+		for (i = portee / 2 + 1, k = portee * 2 - 1; k > 0; k -= 4, i++)
+			for (j = -k / 2; j <= k / 2; j++)
+				cases[l++] = getCase(x - decalage * i, y + j);
+
+		return cases;
 	}
 
 	@Override
@@ -318,10 +394,14 @@ public class Wargame implements ICarte {
 		panneau.repaint();
 	}
 
+	/**
+	 * Supprime un soldat du jeu (vérifier avant si ça vie < 0)
+	 * 
+	 * @param soldat le soldat en question
+	 */
 	@Override
 	public void mort(Soldat soldat) {
-		// TODO Auto-generated method stub
-
+		soldat.mort();
 	}
 
 	@Override
@@ -335,7 +415,7 @@ public class Wargame implements ICarte {
 	}
 
 	@Override
-	public Position trouvePositionVide() {
+	public Case trouvePositionVide() {
 		int x, y;
 		Case c;
 
@@ -344,7 +424,7 @@ public class Wargame implements ICarte {
 			y = (int) (Math.random() * sy);
 			c = getCase(x, y);
 			if (c.getElement() == null) {
-				return new Position(x, y);
+				return c;
 			}
 		}
 	}
@@ -358,7 +438,7 @@ public class Wargame implements ICarte {
 	 * @param ymax coord y du bas droit du rectangle
 	 * @return
 	 */
-	public Position trouvePositionVide(int xmin, int ymin, int xmax, int ymax) {
+	public Case trouvePositionVide(int xmin, int ymin, int xmax, int ymax) {
 		int x, y;
 		Case c;
 
@@ -368,13 +448,13 @@ public class Wargame implements ICarte {
 
 			c = getCase(x, y);
 			if (c.getElement() == null) {
-				return new Position(x, y);
+				return c;
 			}
 		}
 	}
 
 	@Override
-	public Position trouvePositionVide(Position pos) {
+	public Case trouvePositionVide(ICase pos) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -385,36 +465,19 @@ public class Wargame implements ICarte {
 	}
 
 	@Override
-	public Soldat trouveSoldat(Position pos, Faction f) {
+	public Soldat trouveSoldat(ICase pos, Faction f) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public Case[] visible(int x, int y, int portee) {
-		Case[] cases = new Case[nombreVisible(portee)];
-		return visible(x, y, portee, cases);
+	@Override
+	public List<ISoldat> getSoldatEnAttente() {
+		return soldatEnAttente;
 	}
 
-	public Case[] visible(int x, int y, int portee, Case[] cases) {
-		int i, j, k, l = 0, decalage;
-		decalage = 2 * ((y + portee + 1) % 2) - 1;
-
-		// milieu
-		for (i = 0; i <= portee; i++)
-			for (j = -portee; j <= portee; j++)
-				cases[l++] = getCase(x + decalage * (i - portee / 2), y + j);
-
-		// droite
-		for (i = portee / 2 + 1 + (portee % 2), k = portee * 2 - 3; k > 0; k -= 4, i++)
-			for (j = -k / 2; j <= k / 2; j++)
-				cases[l++] = getCase(x + decalage * i, y + j);
-
-		// gauche
-		for (i = portee / 2 + 1, k = portee * 2 - 1; k > 0; k -= 4, i++)
-			for (j = -k / 2; j <= k / 2; j++)
-				cases[l++] = getCase(x - decalage * i, y + j);
-
-		return cases;
+	@Override
+	public Case[] getVisibles() {
+		return visibles;
 	}
 
 }

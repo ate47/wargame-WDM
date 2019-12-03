@@ -24,7 +24,13 @@ public interface ICarte {
 		 * @see ICarte.ICase#setElement(Element)
 		 */
 		Element getElement();
-
+		
+		/**
+		 * cherche les cases visibles depuis cette position suivant une certaine portée 
+		 * @param portee la portée
+		 * @return la teableau des positions visibles
+		 */
+		ICase[] visible(int portee);
 		/**
 		 * @return la position x de la case
 		 */
@@ -84,7 +90,7 @@ public interface ICarte {
 	 * 
 	 * @param e l'element
 	 */
-	void ajouteElement(Element e);
+	void ajouteElement(int x, int y, Element e);
 
 	/**
 	 * click sur une position
@@ -122,7 +128,7 @@ public interface ICarte {
 	 * @param pos la position de l'élement
 	 * @return l'élement sur cette position
 	 */
-	default Element getElement(Position pos) {
+	default Element getElement(ICase pos) {
 		return getElement(pos.getX(), pos.getY());
 	}
 
@@ -190,7 +196,7 @@ public interface ICarte {
 	 * 
 	 * @return la position vide
 	 */
-	Position trouvePositionVide();
+	ICase trouvePositionVide();
 
 	/**
 	 * Trouve une position vide choisie aléatoirement parmi les 8 positions
@@ -199,7 +205,7 @@ public interface ICarte {
 	 * @param pos position ou chercher
 	 * @return la position
 	 */
-	Position trouvePositionVide(Position pos);
+	ICase trouvePositionVide(ICase pos);
 
 	/**
 	 * Trouve aléatoirement un soldat de la faction f
@@ -215,7 +221,7 @@ public interface ICarte {
 	 * @param pos la position ou chercher
 	 * @return le héros trouvé
 	 */
-	ISoldat trouveSoldat(Position pos, Faction f);
+	ISoldat trouveSoldat(ICase pos, Faction f);
 
 	/**
 	 * alloue un tableau de case suffisament grand et appel la méthode {@link ICarte#visible(int, int, int, Case[])}
@@ -226,7 +232,7 @@ public interface ICarte {
 	 * @see ICarte#visible(int, int, int, Case[])
 	 * @see ICarte#nombreVisible(int)
 	 */
-	Case[] visible(int x, int y, int portee);
+	ICase[] visible(int x, int y, int portee);
 
 	/**
 	 * cherche les cases visibles depuis une position suivant une certaine portée
@@ -239,5 +245,5 @@ public interface ICarte {
 	 * @see ICarte#visible(int, int, int)
 	 * @see ICarte#nombreVisible(int)
 	 */
-	Case[] visible(int x, int y, int portee, Case[] cases);
+	ICase[] visible(int x, int y, int portee, ICase[] cases);
 }

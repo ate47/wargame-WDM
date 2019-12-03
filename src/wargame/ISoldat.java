@@ -1,8 +1,10 @@
 package wargame;
 
+import wargame.ICarte.ICase;
+
 public interface ISoldat {
 	enum SoldatProchainMouvement {
-		DEPLACEMENT, RIEN
+		COMBAT, DEPLACEMENT, RIEN
 	}
 
 	/**
@@ -38,13 +40,37 @@ public interface ISoldat {
 	 * @param newPos la nouvelle position
 	 * @throws IllegalMoveException si la position n'est pas valide
 	 */
-	void seDeplace(Position newPos) throws IllegalMoveException;
+	void seDeplace(ICase newPos) throws IllegalMoveException;
+	
+	/**
+	 * Demande un combat de ce soldat avec une cible pour le prochain tour 
+	 * @param enemi la cible
+	 * @throws IllegalMoveException 
+	 */
+	
+	void seBat(Soldat enemi)throws IllegalMoveException;
+	
+	/*
+	 * Demande que l'unité ce soigne pour le prochain tour
+	 * @throws IllegalMoveException
+	 */
 	
 	void seRegen() throws IllegalMoveException;
+	
+
+	void setVie(int vie);
+
+
+	int getVie();
+
 
 	SoldatProchainMouvement getProchainMouvement();
 	
-	Position getPosition();
+	ICase getPosition();
 
-	Position getNextPosition();
+	ICase getNextPosition();
+	
+	Soldat getCible();
+	
+	boolean estMort();
 }

@@ -1,6 +1,9 @@
 package wargame;
 
 public interface ISoldat {
+	enum SoldatProchainMouvement {
+		DEPLACEMENT, RIEN
+	}
 
 	/**
 	 * Attaque un autre soldat
@@ -36,4 +39,12 @@ public interface ISoldat {
 	 * @throws IllegalMoveException si la position n'est pas valide
 	 */
 	void seDeplace(Position newPos) throws IllegalMoveException;
+	
+	void seRegen() throws IllegalMoveException;
+
+	SoldatProchainMouvement getProchainMouvement();
+	
+	Position getPosition();
+
+	Position getNextPosition();
 }

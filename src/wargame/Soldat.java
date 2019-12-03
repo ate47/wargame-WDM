@@ -1,13 +1,19 @@
 package wargame;
 
 public class Soldat extends Element implements ISoldat {
+	private int vie;
 	private IType type;
 	private Position nextPosition;
-	private boolean joue;
+	private SoldatProchainMouvement mouvement = SoldatProchainMouvement.RIEN;
+
+	public SoldatProchainMouvement getProchainMouvement() {
+		return mouvement;
+	}
 
 	public Soldat(IType type) {
 		super(type.getImage());
 		this.type = type;
+		vie = type.getPointsDeVie();
 	}
 
 	public Soldat(Position pos, IType type) {
@@ -17,10 +23,11 @@ public class Soldat extends Element implements ISoldat {
 
 	@Override
 	public boolean aJoueCeTour() {
-		return joue;
+		return mouvement != SoldatProchainMouvement.RIEN;
 	}
+
 	public void annulerTour() {
-		joue = false;
+		mouvement = SoldatProchainMouvement.RIEN;
 	}
 
 	@Override
@@ -35,16 +42,45 @@ public class Soldat extends Element implements ISoldat {
 
 	@Override
 	public void joueTour() {
-		joue = false;
-		setPosition(nextPosition);
+		switch (mouvement) {
+		case DEPLACEMENT:
+			setPosition(nextPosition);
+			break;
+		case RIEN:
+			setVie(Math.min(getVie() + IConfig.VIE_PAR_REGEN, getType().getPointsDeVie()));
+			break;
+		default:
+			return;
+		}
+		mouvement = SoldatProchainMouvement.RIEN;
+	}
+
+	public void setVie(int vie) {
+		this.vie = vie;
+	}
+
+	public int getVie() {
+		return vie;
 	}
 
 	@Override
 	public void seDeplace(Position newPos) throws IllegalMoveException {
-		if (joue)
+		if (mouvement != SoldatProchainMouvement.RIEN)
 			throw new IllegalMoveException();
 		nextPosition = newPos;
-		joue = true;
+		mouvement = SoldatProchainMouvement.DEPLACEMENT;
+	}
+
+	@Override
+	public void seRegen() throws IllegalMoveException {
+		if (mouvement != SoldatProchainMouvement.RIEN)
+			throw new IllegalMoveException();
+		mouvement = SoldatProchainMouvement.RIEN;
+	}
+	
+	@Override
+	public Position getNextPosition() {
+		return nextPosition;
 	}
 
 }

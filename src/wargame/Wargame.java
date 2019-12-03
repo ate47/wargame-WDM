@@ -1,11 +1,15 @@
 package wargame;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+
 import wargame.IType.Faction;
 
-public class Carte implements ICarte {
+public class Wargame implements ICarte {
 	public class Case extends Position implements ICase {
 		private boolean visible, visite, accessible;
 		private Element e;
@@ -57,8 +61,9 @@ public class Carte implements ICarte {
 				if (e != null && e instanceof Soldat) {
 					Soldat s = (Soldat) e;
 					if (s.getType().getFaction() == factionJoueur && !s.aJoueCeTour()) {
+						System.out.println(s.getType());
 						soldat = s;
-						visibles = visible(getX(), getY(), s.getType().getTir());
+						visibles = visible(getX(), getY(), Math.max(s.getType().getTir(), 1));
 						for (Case v : visibles)
 							if (v != null)
 								v.accessible = true;
@@ -75,6 +80,7 @@ public class Carte implements ICarte {
 				for (Case c : visibles)
 					if (c != null)
 						c.accessible = false;
+				soldatEnAttente.add(soldat);
 				soldat = null;
 				visibles = null;
 			} else if (e != null && e.getPosition().equals(soldat.getPosition())) {
@@ -92,24 +98,48 @@ public class Carte implements ICarte {
 	}
 
 	private PanneauJeu panneau;
+	private MenuJeu menu;
+	private JFrame frame;
 	private int sx, sy;
-	private List<Soldat> soldatJoueur = new ArrayList<>();
-	private List<Soldat> soldatEnAttente = new ArrayList<>();
+	private List<ISoldat> soldatJoueur = new ArrayList<>();
+	private List<ISoldat> soldatEnAttente = new ArrayList<>();
 	private Faction factionJoueur;
+	private Faction factionEnnemy;
 	private Case[][] carte;
 	private ICase hoveredCase;
 	private Case[] visibles;
 	private Soldat soldat;
 
-	public Carte(int sx, int sy, Faction factionJoueur) {
+	public Wargame(int sx, int sy, Faction factionJoueur) {
+
+		frame = new JFrame("Wargame");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setLocationByPlatform(true);
+		frame.setSize(800, 600);
+
 		this.sx = sx;
 		this.sy = sy;
 		this.carte = new Case[sx][sy];
 		for (int i = 0; i < carte.length; i++)
 			for (int j = 0; j < carte[i].length; j++)
 				carte[i][j] = this.new Case(i, j);
-		this.panneau = new PanneauJeu(this);
+
+		panneau = new PanneauJeu(this);
+		panneau.setPreferredSize(frame.getSize());
+
+		menu = new MenuJeu(this);
+		menu.setPreferredSize(frame.getSize());
+		
+		frame.setContentPane(menu);
+
 		this.factionJoueur = factionJoueur;
+		factionEnnemy = factionJoueur.getOthers();
+
+		try {
+			frame.setIconImage(ImageIO.read(Wargame.class.getResourceAsStream("ico.png")));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -168,8 +198,10 @@ public class Carte implements ICarte {
 			break;
 
 		}
-		for (i = 0; i < IConfig.NB_HEROS; i++)
-			ajouteElement(new Soldat(trouvePositionVide(xmin, ymin, xmax, ymax), Faction.BLANC.getRandomElement()));
+		for (i = 0; i < factionJoueur.nombreGenere(); i++)
+			ajouteElement(new Soldat(trouvePositionVide(xmin, ymin, xmax, ymax), factionJoueur.getRandomElement()));
+
+		panneau.lookAt((xmax + xmin) / 2, (ymax + ymin) / 2);
 
 		carre = ((int) (Math.random() * 3) + 1 + carre) % 4; // eviter le meme carre
 		switch (carre) {
@@ -200,10 +232,14 @@ public class Carte implements ICarte {
 			break;
 
 		}
-		for (i = 0; i < IConfig.NB_MONSTRES; i++)
-			ajouteElement(new Soldat(trouvePositionVide(xmin, ymin, xmax, ymax), Faction.VERT.getRandomElement()));
+		for (i = 0; i < factionEnnemy.nombreGenere(); i++)
+			ajouteElement(new Soldat(trouvePositionVide(xmin, ymin, xmax, ymax), factionEnnemy.getRandomElement()));
 
 		jouerSoldats();
+	}
+
+	public List<ISoldat> getSoldatEnAttente() {
+		return soldatEnAttente;
 	}
 
 	@Override
@@ -235,6 +271,10 @@ public class Carte implements ICarte {
 		return sx;
 	}
 
+	public JFrame getFrame() {
+		return frame;
+	}
+
 	@Override
 	public PanneauJeu getPanneau() {
 		return panneau;
@@ -252,14 +292,14 @@ public class Carte implements ICarte {
 	public Case[] visible(int x, int y, int portee, Case[] cases) {
 		int i, j, k, l = 0, decalage;
 		decalage = 2 * ((y + portee + 1) % 2) - 1;
-		
+
 		// milieu
 		for (i = 0; i <= portee; i++)
 			for (j = -portee; j <= portee; j++)
 				cases[l++] = getCase(x + decalage * (i - portee / 2), y + j);
-		
+
 		// droite
-		for (i = portee / 2 + 2, k = portee * 2 - 3; k > 2; k -= 4, i++)
+		for (i = portee / 2 + 1 + (portee % 2), k = portee * 2 - 3; k > 0; k -= 4, i++)
 			for (j = -k / 2; j <= k / 2; j++)
 				cases[l++] = getCase(x + decalage * i, y + j);
 
@@ -278,10 +318,10 @@ public class Carte implements ICarte {
 			for (j = 0; j < carte[i].length; j++)
 				carte[i][j].setVisible(false);
 		// 0 le BrG
-		for (Soldat s : soldatEnAttente)
+		for (ISoldat s : soldatEnAttente)
 			s.joueTour();
 
-		for (Soldat s : soldatJoueur) {
+		for (ISoldat s : soldatJoueur) {
 			for (Case c : visible(s.getPosition().getX(), s.getPosition().getY(), s.getType().getPorteeVisuelle()))
 				if (c != null) {
 					c.setVisible(true);
@@ -343,7 +383,7 @@ public class Carte implements ICarte {
 	}
 
 	@Override
-	public Soldat trouveSoldat(Faction f) {
+	public ISoldat trouveSoldat(Faction f) {
 		return soldatJoueur.get((int) (soldatJoueur.size() * Math.random()));
 	}
 
@@ -353,9 +393,8 @@ public class Carte implements ICarte {
 		return null;
 	}
 
-	@Override
-	public void clickSurPosition(int x, int y) {
-		getCase(x, y).click();
+	public MenuJeu getMenu() {
+		return menu;
 	}
 
 }

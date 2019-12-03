@@ -1,8 +1,12 @@
 package wargame;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
@@ -10,7 +14,7 @@ import javax.swing.JPanel;
 
 import wargame.ICarte.ICase;
 
-public class PanneauJeu extends JPanel implements ListenerAdapter {
+public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 	private static final long serialVersionUID = -8883115886343935124L;
 	public static final ImageAsset GRASS = new ImageAsset("grass0.png", "grass1.png", "grass2.png", "grass3.png");
 	public static final ImageAsset HOVER = new ImageAsset("hover.png");
@@ -18,22 +22,23 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	public static final ImageAsset VISITE = new ImageAsset("visite.png");
 	public static final ImageAsset INVISIBLE_HL = new ImageAsset("dark_brouillard_guerre.png");
 	public static final ImageAsset INACCESSIBLE = new ImageAsset("inaccessible.png");
-	
+	public static final ImageAsset OPT_REGEN = new ImageAsset("regen.png");
+
 	private float zoom;
 	private int mouseX, mouseY;
 	private Point originDragPoint;
 	private float translateX, translateY;
 	private float originTranslateX, originTranslateY;
-	private ICarte carte;
+	private Wargame carte;
 
-	public PanneauJeu(ICarte carte) {
+	public PanneauJeu(Wargame carte) {
 		this.carte = carte;
 		zoom = Math.max(carte.getLargeur(), carte.getHauteur()) / 5;
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener(this);
+		addKeyListener(this);
 		setSize(800, 600);
-		lookAt(carte.getLargeur() / 2, carte.getHauteur() / 2);
 	}
 
 	public boolean isInHexa(int x, int y, int w, int h) {
@@ -137,6 +142,31 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 
 	private static final Color BACKGROUND = new Color(0x505050);
 
+	public static void dessinerFleche(Graphics g, int ox, int oy, int dx, int dy, int taille) {
+		int x, y;
+		double norme, angle;
+
+		x = dx - ox;
+		y = dy - oy;
+		norme = Math.sqrt(x * x + y * y);
+		// != 0 par construction
+
+		angle = (Math.asin(y / norme) < 0 ? -1 : 1) * Math.acos(x / norme);
+
+		g.setColor(Color.RED);
+		g.drawLine(ox, oy, dx, dy);
+		g.fillOval(ox - 5, oy - 5, 10, 10);
+
+		x = dx + (int) (Math.cos(angle + 5 * Math.PI / 4) * taille);
+		y = dy + (int) (Math.sin(angle + 5 * Math.PI / 4) * taille);
+
+		g.drawLine(dx, dy, x, y);
+		x = dx + (int) (Math.cos(angle + 3 * Math.PI / 4) * taille);
+		y = dy + (int) (Math.sin(angle + 3 * Math.PI / 4) * taille);
+
+		g.drawLine(dx, dy, x, y);
+	}
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -150,15 +180,20 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		int translateXEnd = (int) (translateXStart + getWidth() * 1F / unit) + 4;
 		int translateYStart = -(int) (this.translateY / 0.6666F) - 2;
 		int translateYEnd = (int) (translateYStart + getHeight() / 0.6666F / unit) + 4;
-		g.translate(translateX, translateY);
 		boolean dedans = false;
+		int x, y;
+		int oldX, oldY, newX, newY;
+
+		if (g instanceof Graphics2D) {
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setStroke(new BasicStroke(unit / 20));
+		}
+		g.translate(translateX, translateY);
 		ICase c;
 		Element e;
 		carte.setHoveredCase(null);
 		for (int i = translateXStart; i < translateXEnd; i++)
 			for (int j = translateYStart; j < translateYEnd; j++) {
-				int x;
-				int y;
 				c = carte.getCase(i, j);
 				if (j % 2 == 0) {
 					x = i * unit;
@@ -167,6 +202,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 					x = (int) ((0.5000F + i) * unit);
 					y = (int) ((0.6666F * j) * unit);
 				}
+
 				if (c == null) {
 					g.drawImage(INVISIBLE_HL.getImageFromPosition(i, j), x, y, unit, unit, this);
 					continue;
@@ -187,17 +223,69 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 					g.drawImage(VISITE.getImageFromPosition(i, j), x, y, unit, unit, this);
 				} else
 					g.drawImage(INVISIBLE.getImageFromPosition(i, j), x, y, unit, unit, this);
-				
+
 				if (carte.getSoldatClick() != null && !c.isAccessible())
 					g.drawImage(INACCESSIBLE.getImageFromPosition(i, j), x, y, unit, unit, this);
-				
+
 				if (!dedans && isInHexa(translateX + x, translateY + y, unit, unit)) {
 					dedans = true;
 					carte.setHoveredCase(c);
 					g.drawImage(HOVER.getImages()[0], x, y, unit, unit, this);
 				}
 			}
+		for (ISoldat s : carte.getSoldatEnAttente()) {
+			switch (s.getProchainMouvement()) {
+			case DEPLACEMENT:
+				x = s.getPosition().getX();
+				y = s.getPosition().getY();
+				if (y % 2 == 0) {
+					oldX = x * unit;
+					oldY = (int) ((0.6666F * y) * unit);
+				} else {
+					oldX = (int) ((0.5000F + x) * unit);
+					oldY = (int) ((0.6666F * y) * unit);
+				}
+				x = s.getNextPosition().getX();
+				y = s.getNextPosition().getY();
+				if (y % 2 == 0) {
+					newX = x * unit;
+					newY = (int) ((0.6666F * y) * unit);
+				} else {
+					newX = (int) ((0.5000F + x) * unit);
+					newY = (int) ((0.6666F * y) * unit);
+				}
+				g.setColor(Color.red);
+				dessinerFleche(g, oldX + unit / 2, oldY + unit / 2, newX + unit / 2, newY + unit / 2, unit / 4);
+				break;
+			case RIEN:
+				x = s.getPosition().getX();
+				y = s.getPosition().getY();
+				if (x >= translateXStart && x < translateXEnd && y >= translateYStart && y < translateYEnd)
+					g.drawImage(OPT_REGEN.getImageFromPosition(x, y), x, y, unit, unit, this);
+				break;
+			default:
+				break;
+			}
+
+		}
 		g.translate(-translateX, -translateY);
 		repaint();
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		System.out.println(KeyEvent.VK_ESCAPE);
+		System.out.println(e.getKeyCode());
+		if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+			carte.getFrame().setContentPane(carte.getMenu());
+			carte.getFrame().pack();
+		}
 	}
 }

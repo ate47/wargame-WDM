@@ -1,8 +1,16 @@
-package wargame;
+package wargame.config;
 
 import wargame.IType.Faction;
 
 public interface IConfig {
+	public MapSize getMapSize();
+
+	public void setMapSize(MapSize mapSize);
+
+	IConfig clone();
+
+	Difficulty getDifficulty();
+
 	Faction getFactionJoueur();
 
 	int getHauteurCarte();
@@ -19,6 +27,8 @@ public interface IConfig {
 
 	boolean isShowingFPS();
 
+	void setDifficulty(Difficulty d);
+
 	void setFactionJoueur(Faction factionJoueur);
 
 	void setHauteurCarte(int hauteurCarte);
@@ -28,8 +38,4 @@ public interface IConfig {
 	void setPourcentageObstacle(float pourcentageObstacle);
 
 	void setShowFps(boolean showFps);
-
-	void setVieParRegen(int vieParRegen);
-	
-	IConfig clone();
 }

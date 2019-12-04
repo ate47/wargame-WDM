@@ -1,6 +1,7 @@
 package wargame;
 
 import wargame.ICarte.ICase;
+import wargame.config.IConfig;
 
 public interface ISoldat {
 	enum SoldatProchainMouvement {

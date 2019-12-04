@@ -1,6 +1,7 @@
 package wargame;
 
 import wargame.ICarte.ICase;
+import wargame.config.IConfig;
 
 public class Soldat extends Element implements ISoldat {
 	public static boolean rechercheSequentielle(ICase[] tableau, Soldat element) {
@@ -57,7 +58,7 @@ public class Soldat extends Element implements ISoldat {
 
 	@Override
 	public boolean estMort() {
-		return vie == 0;
+		return vie <= 0 || getPosition() == null;
 	}
 
 	@Override
@@ -99,7 +100,7 @@ public class Soldat extends Element implements ISoldat {
 			break;
 		case RIEN:
 		default:
-			setVie(Math.min(getVie() + cfg.getVieParRegen(), getType().getPointsDeVie()));
+			setVie(Math.min(getVie() + (int) (cfg.getVieParRegen() * cfg.getDifficulty().getMultiplicateurVie()), getType().getPointsDeVie()));
 			break;
 		}
 		mouvement = SoldatProchainMouvement.RIEN;

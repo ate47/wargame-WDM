@@ -2,6 +2,7 @@ package wargame;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -13,6 +14,7 @@ import java.awt.event.MouseWheelEvent;
 import javax.swing.JPanel;
 
 import wargame.ICarte.ICase;
+import wargame.utils.WargameUtils;
 
 public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 	private static final long serialVersionUID = -8883115886343935124L;
@@ -67,7 +69,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		addKeyListener(this);
 		setSize(800, 600);
 	}
-	
+
 	public void init() {
 		zoom = Math.max(carte.getLargeur(), carte.getHauteur()) / 5;
 	}
@@ -105,12 +107,10 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-	}
+	public void keyReleased(KeyEvent e) {}
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-	}
+	public void keyTyped(KeyEvent e) {}
 
 	public void lookAt(int x, int y) {
 		int unit = getUnit();
@@ -256,6 +256,8 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 				}
 			}
 
+		Font old = g.getFont();
+		g.setFont(old.deriveFont(unit / 10F - 2F));
 
 		for (ISoldat s : carte.getSoldatJoueur())
 			if (!s.estMort()) {
@@ -304,7 +306,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 				default:
 					break;
 				}
-				g.setColor(Color.DARK_GRAY);
+				g.setColor(Color.GRAY);
 				g.fillRect(oldX + unit / 8, oldY + unit / 10, unit * 6 / 8, unit / 10);
 				float percentage = (float) s.getVie() / s.getType().getPointsDeVie();
 				if (percentage < .25F)
@@ -316,6 +318,9 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 				else
 					g.setColor(Color.GREEN);
 				g.fillRect(oldX + unit / 7, oldY + unit / 10 + 1, (int) (percentage * unit * 5 / 7), unit / 10 - 2);
+				g.setColor(Color.black);
+				WargameUtils.drawCenter(g, oldX + unit / 8 + unit * 6 / 16, oldY + unit / 10 + unit / 20,
+						s.getVie() + " / " + s.getType().getPointsDeVie());
 			}
 		for (ISoldat s : carte.getSoldatEnnemis())
 			if (!s.estMort() && s.getPosition().isVisible()) {
@@ -329,7 +334,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 					oldY = (int) ((0.6666F * y) * unit);
 				}
 
-				g.setColor(Color.DARK_GRAY);
+				g.setColor(Color.GRAY);
 				g.fillRect(oldX + unit / 8, oldY + unit / 10, unit * 6 / 8, unit / 10);
 				float percentage = (float) s.getVie() / s.getType().getPointsDeVie();
 				if (percentage < .25F)
@@ -341,8 +346,12 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 				else
 					g.setColor(Color.GREEN);
 				g.fillRect(oldX + unit / 7, oldY + unit / 10 + 1, (int) (percentage * unit * 5 / 7), unit / 10 - 2);
+				g.setColor(Color.black);
+				WargameUtils.drawCenter(g, oldX + unit / 8 + unit * 6 / 16, oldY + unit / 10 + unit / 20,
+						s.getVie() + " / " + s.getType().getPointsDeVie());
 			}
 
+		g.setFont(old);
 		g.translate(-translateX, -translateY);
 	}
 }

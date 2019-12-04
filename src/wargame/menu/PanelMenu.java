@@ -54,12 +54,24 @@ public class PanelMenu extends JPanel implements ComponentListener {
 		}
 	}
 
+	protected int getTop() {
+		return getHeight() / 3;
+	}
+
 	protected void addButton(String text, ActionListener listener) {
-		JButton button = (JButton) (components[buttonCount] = new MenuButton(text));
+		JButton button = new MenuButton(text);
 		button.addActionListener(listener);
-		button.setBounds((getWidth() - 250) / 2, getHeight() / 3 + 60 * buttonCount, 250, 40);
-		add(button);
+		addComponend(button);
+	}
+
+	protected void addComponend(JComponent component) {
+		int sizeX = 2 * getWidth() / 5;
+		int sizeY = getHeight() / 10;
+		int decalage = getHeight() / 50;
+		add(components[buttonCount] = component);
+		component.setBounds((getWidth() - sizeX) / 2, getHeight() / 3 + (decalage + sizeY) * buttonCount, sizeX, sizeY);
 		buttonCount++;
+		repaint();
 	}
 
 	public void paint(Graphics g, int width, int height) {

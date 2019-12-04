@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -20,10 +21,14 @@ import javax.swing.JRootPane;
 import javax.swing.Timer;
 
 import wargame.IType.Faction;
+import wargame.config.Config;
+import wargame.config.IConfig;
 import wargame.menu.MenuButton;
 import wargame.menu.MenuJeu;
 
 public class Wargame implements ICarte {
+	public static final Random RANDOM = new Random();
+
 	public class Case implements ICase {
 		private boolean visible, visite, accessible;
 		private Element e;
@@ -44,7 +49,7 @@ public class Wargame implements ICarte {
 						if (s.aJoueCeTour())
 							s.annulerTour();
 						soldat = s;
-						visibles = visible(Math.max(s.getType().getTir(), 1));
+						visibles = visible(s.getType().getPorteeVisuelle());
 						for (Case v : visibles)
 							if (v != null)
 								v.accessible = true;
@@ -252,6 +257,7 @@ public class Wargame implements ICarte {
 		});
 
 		panneau = new PanneauJeu(this);
+		panneau.setPreferredSize(frame.getSize());
 		panneau.add(finTour);
 
 		menu = new MenuJeu(this);
@@ -275,11 +281,11 @@ public class Wargame implements ICarte {
 
 	@Override
 	public void genererCarte() {
-		int i, j, carre, xmin, ymin, xmax, ymax, nbObstacle;
+		int i, j, k, carre, xmin, ymin, xmax, ymax, nb;
 		int cameraX, cameraY;
 
 		// LECTURE DES CONFIGURATIONS
-		
+
 		this.factionJoueur = config.getFactionJoueur();
 		factionEnnemi = factionJoueur.getOthers();
 
@@ -289,11 +295,11 @@ public class Wargame implements ICarte {
 		for (i = 0; i < carte.length; i++)
 			for (j = 0; j < carte[i].length; j++)
 				carte[i][j] = this.new Case(i, j);
-		
+
 		// PRODUCTION DES OBSTACLES
-		
-		nbObstacle = config.getNombreObstacle();
-		for (i = 0; i < nbObstacle; i++)
+
+		nb = config.getNombreObstacle();
+		for (i = 0; i < nb; i++)
 			trouvePositionVide().setElement(new Obstacle());
 
 		carre = (int) (Math.random() * 4);
@@ -327,10 +333,10 @@ public class Wargame implements ICarte {
 		}
 
 		// PRODUCTION DES SOLDATS
-		
-		soldatJoueur = new Soldat[factionJoueur.nombreGenere()];
+		nb = (int) (factionJoueur.nombreGenere() * config.getMapSize().getFactor());
+		soldatJoueur = new Soldat[nb];
 
-		for (i = 0; i < factionJoueur.nombreGenere(); i++)
+		for (i = 0; i < nb; i++)
 			trouvePositionVide(xmin, ymin, xmax, ymax)
 					.setElement(soldatJoueur[i] = new Soldat(factionJoueur.getRandomElement()));
 
@@ -338,48 +344,57 @@ public class Wargame implements ICarte {
 		cameraX = (xmax + xmin) / 2;
 		cameraY = (ymax + ymin) / 2;
 
-		carre = ((int) (Math.random() * 3) + 1 + carre) % 4; // eviter la meme zone
-		switch (carre) {
-		case 0:
-			xmin = 0;
-			ymin = 0;
-			xmax = getLargeur() / 2;
-			ymax = getHauteur() / 2;
-			break;
-		case 1:
-			xmin = getLargeur() / 2;
-			;
-			ymin = 0;
-			xmax = getLargeur();
-			ymax = getHauteur() / 2;
-			break;
-		case 2:
-			xmin = 0;
-			ymin = getHauteur() / 2;
-			xmax = getLargeur() / 2;
-			ymax = getHauteur();
-			break;
-		default:
-			xmin = getLargeur() / 2 + 1;
-			ymin = getHauteur() / 2 + 1;
-			xmax = getLargeur();
-			ymax = getHauteur();
-			break;
-
-		}
+		nb = (int) (factionEnnemi.nombreGenere() * config.getDifficulty().getMultiplicateurEnnemis()
+				* config.getMapSize().getFactor());
 
 		// PRODUCTION DES AUTRES SOLDATS
-		soldatEnnemis = new Soldat[factionEnnemi.nombreGenere()];
+		soldatEnnemis = new Soldat[nb * config.getDifficulty().getAreaCount()];
+		k = 0;
 
-		for (i = 0; i < factionEnnemi.nombreGenere(); i++)
-			trouvePositionVide(xmin, ymin, xmax, ymax)
-					.setElement(soldatEnnemis[i] = new Soldat(factionEnnemi.getRandomElement()));
+		carre = (carre + 1 + RANDOM.nextInt(4 - config.getDifficulty().getAreaCount())) % 4;
 
+		for (j = 0; j < config.getDifficulty().getAreaCount(); j++) {
+			switch (carre) {
+			case 0:
+				xmin = 0;
+				ymin = 0;
+				xmax = getLargeur() / 2;
+				ymax = getHauteur() / 2;
+				break;
+			case 1:
+				xmin = getLargeur() / 2;
+				;
+				ymin = 0;
+				xmax = getLargeur();
+				ymax = getHauteur() / 2;
+				break;
+			case 2:
+				xmin = 0;
+				ymin = getHauteur() / 2;
+				xmax = getLargeur() / 2;
+				ymax = getHauteur();
+				break;
+			default:
+				xmin = getLargeur() / 2 + 1;
+				ymin = getHauteur() / 2 + 1;
+				xmax = getLargeur();
+				ymax = getHauteur();
+				break;
+
+			}
+
+			carre = (carre + 1) % 4;
+
+			for (i = 0; i < nb; i++, k++)
+				trouvePositionVide(xmin, ymin, xmax, ymax)
+						.setElement(soldatEnnemis[k] = new Soldat(factionEnnemi.getRandomElement()));
+
+		}
 		// ON LANCE L'AFFICHAGE
-		
+
 		panneau.init();
 		panneau.lookAt(cameraX, cameraY);
-		
+
 		// CALCUL DU BROUILLARD DE GUERRE
 		jouerSoldats();
 	}
@@ -507,7 +522,7 @@ public class Wargame implements ICarte {
 	public void mort(Soldat soldat) {
 		soldat.mort();
 	}
-	
+
 	@Override
 	public int nombreVisible(int portee) {
 		return 3 * portee * (portee + 1) + 1;

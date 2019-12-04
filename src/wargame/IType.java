@@ -8,7 +8,7 @@ public interface IType {
 	 * Represente une faction pour un soldat
 	 */
 	public enum Faction {
-		BLANC(TypeBon.values(), 6, "faction/faction_blanc.png"),
+		BLANC(TypeBon.values(), 10, "faction/faction_blanc.png"),
 		VERT(TypeMauvais.values(), 15, "faction/faction_vert.png");
 		public static Faction getRandomFaction() {
 			return values()[(int) (Math.random() * values().length)];
@@ -59,14 +59,19 @@ public interface IType {
 		public int nombreGenere() {
 			return nombreGenere;
 		}
+
+		public String getName() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 
 	/**
 	 * Represente un {@link IType} pour la faction {@link Faction#BLANC}
 	 */
 	public enum TypeBon implements IType {
-		HUMAIN(40, 3, 10, 2, "soldat/blanc_humain.png"), NAIN(80, 1, 20, 0, "soldat/blanc_nain.png"),
-		ELF(70, 5, 10, 6, "soldat/blanc_elf.png"), HOBBIT(20, 3, 5, 2, "soldat/blanc_hobbit.png");
+		HUMAIN(400, 3, 100, 20, "soldat/blanc_humain.png"), NAIN(800, 1, 200, 0, "soldat/blanc_nain.png"),
+		ELF(700, 5, 100, 60, "soldat/blanc_elf.png"), HOBBIT(200, 3, 50, 20, "soldat/blanc_hobbit.png");
 
 		private ImageAsset image;
 		private final int POINTS_DE_VIE, PORTEE_VISUELLE, PUISSANCE, TIR;
@@ -116,8 +121,8 @@ public interface IType {
 	 * Represente un {@link IType} pour la faction {@link Faction#VERT}
 	 */
 	public enum TypeMauvais implements IType {
-		TROLL(100, 1, 30, 0, "soldat/vert_troll.png"), ORC(40, 3, 10, 3, "soldat/vert_orc.png"),
-		GOBELIN(20, 3, 5, 2, "soldat/vert_gobelin.png");
+		TROLL(1000, 1, 300, 0, "soldat/vert_troll.png"), ORC(400, 3, 100, 30, "soldat/vert_orc.png"),
+		GOBELIN(200, 3, 50, 20, "soldat/vert_gobelin.png");
 
 		private ImageAsset image;
 		private final int POINTS_DE_VIE, PORTEE_VISUELLE, PUISSANCE, TIR;

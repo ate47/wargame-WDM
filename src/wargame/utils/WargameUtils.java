@@ -17,7 +17,7 @@ public class WargameUtils {
 	 */
 	public static void drawCenter(Graphics g, int x, int y, String s) {
 		Rectangle2D text = g.getFontMetrics(g.getFont()).getStringBounds(s, g);
-		g.drawString(s, x - (int) (text.getWidth() / 2), y - 6 + (int) (text.getHeight() / 2));
+		g.drawString(s, x - (int) (text.getWidth() / 2), y - 2 + (int) (text.getHeight() / 2));
 	}
 	
 	/**

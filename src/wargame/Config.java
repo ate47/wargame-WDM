@@ -14,6 +14,17 @@ public class Config implements IConfig, Serializable {
 	private int vieParRegen = 7;
 	private Faction factionJoueur = Faction.VERT;
 
+	public Config() {}
+
+	private Config(Config old) {
+		this.showFps = old.showFps;
+		this.largeurCarte = old.largeurCarte;
+		this.hauteurCarte = old.hauteurCarte;
+		this.pourcentageObstacle = old.pourcentageObstacle;
+		this.vieParRegen = old.vieParRegen;
+		this.factionJoueur = old.factionJoueur;
+	}
+
 	@Override
 	public boolean isShowingFPS() {
 		return showFps;
@@ -82,6 +93,11 @@ public class Config implements IConfig, Serializable {
 	@Override
 	public void setFactionJoueur(Faction factionJoueur) {
 		this.factionJoueur = factionJoueur;
+	}
+
+	@Override
+	public Config clone() {
+		return new Config(this);
 	}
 
 }

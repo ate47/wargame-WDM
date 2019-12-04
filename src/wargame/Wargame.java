@@ -20,6 +20,8 @@ import javax.swing.JRootPane;
 import javax.swing.Timer;
 
 import wargame.IType.Faction;
+import wargame.menu.MenuButton;
+import wargame.menu.MenuJeu;
 
 public class Wargame implements ICarte {
 	public class Case implements ICase {
@@ -218,9 +220,8 @@ public class Wargame implements ICarte {
 
 	private PanneauJeu panneau;
 	private MenuJeu menu;
-	private FakeGameDrawer fakeGameDrawer;
 
-	private Config config;
+	private IConfig config;
 
 	private JFrame frame;
 	private int sx, sy;
@@ -233,35 +234,6 @@ public class Wargame implements ICarte {
 	private Case[] visibles;
 	private Soldat soldat;
 	private JButton finTour;
-
-	public void readConfig() {
-		if (SAVE_FILE.exists()) {
-			System.out.println("Lecture de " + SAVE_FILE.getAbsolutePath() + "... ");
-			try (FileInputStream in = new FileInputStream(SAVE_FILE)) {
-				ObjectInputStream ois = new ObjectInputStream(in);
-				config = (Config) ois.readObject();
-				return;
-			} catch (IOException | ClassNotFoundException e) {
-				if (JOptionPane.showConfirmDialog(null, "Voulez vous ecraser le fichier existant ?\n" + e.getMessage(),
-						"Erreur lors de la lecture du fichier", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
-					System.exit(0);
-			}
-		}
-		config = new Config();
-		writeConfig();
-	}
-
-	public void writeConfig() {
-		System.out.println("Ecriture de " + SAVE_FILE.getAbsolutePath() + "... ");
-		try (FileOutputStream out = new FileOutputStream(SAVE_FILE)) {
-			ObjectOutputStream oos = new ObjectOutputStream(out);
-			oos.writeObject(config);
-		} catch (IOException e) {
-			if (JOptionPane.showConfirmDialog(null, "Erreur lors de la sauvegarde, continuer ?\n" + e.getMessage(),
-					"Impossible de sauvegarder le jeu", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
-				System.exit(0);
-		}
-	}
 
 	public Wargame() {
 		frame = new GameFrame("Wargame");
@@ -279,10 +251,7 @@ public class Wargame implements ICarte {
 			}
 		});
 
-		fakeGameDrawer = new FakeGameDrawer(this);
-
 		panneau = new PanneauJeu(this);
-		panneau.setPreferredSize(frame.getSize());
 		panneau.add(finTour);
 
 		menu = new MenuJeu(this);
@@ -431,13 +400,6 @@ public class Wargame implements ICarte {
 		return getCase(posX, posY).getElement();
 	}
 
-	/**
-	 * @return le dessinateur de faux jeu
-	 */
-	public FakeGameDrawer getFakeGameDrawer() {
-		return fakeGameDrawer;
-	}
-
 	public float getFps() {
 		return fps;
 	}
@@ -523,6 +485,7 @@ public class Wargame implements ICarte {
 	public void lancerJeu() {
 		readConfig();
 
+		frame.pack();
 		frame.setVisible(true);
 
 		/* sync des fps */
@@ -544,10 +507,31 @@ public class Wargame implements ICarte {
 	public void mort(Soldat soldat) {
 		soldat.mort();
 	}
-
+	
 	@Override
 	public int nombreVisible(int portee) {
 		return 3 * portee * (portee + 1) + 1;
+	}
+
+	public void readConfig() {
+		if (SAVE_FILE.exists()) {
+			System.out.println("Lecture de " + SAVE_FILE.getAbsolutePath() + "... ");
+			try (FileInputStream in = new FileInputStream(SAVE_FILE)) {
+				ObjectInputStream ois = new ObjectInputStream(in);
+				config = (Config) ois.readObject();
+				return;
+			} catch (IOException | ClassNotFoundException e) {
+				if (JOptionPane.showConfirmDialog(null, "Voulez vous ecraser le fichier existant ?\n" + e.getMessage(),
+						"Erreur lors de la lecture du fichier", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
+					System.exit(0);
+			}
+		}
+		config = new Config();
+		writeConfig();
+	}
+
+	public void setConfig(IConfig config) {
+		this.config = config;
 	}
 
 	@Override
@@ -637,6 +621,18 @@ public class Wargame implements ICarte {
 				cases[l++] = getCase(x - decalage * i, y + j);
 
 		return cases;
+	}
+
+	public void writeConfig() {
+		System.out.println("Ecriture de " + SAVE_FILE.getAbsolutePath() + "... ");
+		try (FileOutputStream out = new FileOutputStream(SAVE_FILE)) {
+			ObjectOutputStream oos = new ObjectOutputStream(out);
+			oos.writeObject(config);
+		} catch (IOException e) {
+			if (JOptionPane.showConfirmDialog(null, "Erreur lors de la sauvegarde, continuer ?\n" + e.getMessage(),
+					"Impossible de sauvegarder le jeu", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
+				System.exit(0);
+		}
 	}
 
 	private void startFrame() {

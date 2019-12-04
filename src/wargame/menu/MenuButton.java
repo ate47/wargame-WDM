@@ -1,4 +1,4 @@
-package wargame;
+package wargame.menu;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -8,6 +8,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.JButton;
 
+import wargame.ImageAsset;
 import wargame.utils.WargameUtils;
 
 public class MenuButton extends JButton implements MouseListener {
@@ -32,7 +33,10 @@ public class MenuButton extends JButton implements MouseListener {
 	public void mousePressed(MouseEvent e) {}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) {
+		mouseIn = false;
+		repaint();
+	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
@@ -60,4 +64,5 @@ public class MenuButton extends JButton implements MouseListener {
 		WargameUtils.drawCenter(g, getWidth() / 2, getHeight() / 2, getText());
 		g.setFont(old);
 	}
+
 }

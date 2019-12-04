@@ -30,4 +30,6 @@ public interface IConfig {
 	void setShowFps(boolean showFps);
 
 	void setVieParRegen(int vieParRegen);
+	
+	IConfig clone();
 }

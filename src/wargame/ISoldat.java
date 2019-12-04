@@ -27,7 +27,7 @@ public interface ISoldat {
 	/**
 	 * joue le tour du soldat
 	 */
-	void joueTour();
+	void joueTour(IConfig cfg);
 
 	/**
 	 * annule la demande d'action du soldat

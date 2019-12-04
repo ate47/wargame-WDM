@@ -8,8 +8,8 @@ public interface IType {
 	 * Represente une faction pour un soldat
 	 */
 	public enum Faction {
-		BLANC(TypeBon.values(), IConfig.NB_HEROS, "faction/faction_blanc.png"),
-		VERT(TypeMauvais.values(), IConfig.NB_MONSTRES, "faction/faction_vert.png");
+		BLANC(TypeBon.values(), 6, "faction/faction_blanc.png"),
+		VERT(TypeMauvais.values(), 15, "faction/faction_vert.png");
 		public static Faction getRandomFaction() {
 			return values()[(int) (Math.random() * values().length)];
 		}

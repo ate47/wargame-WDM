@@ -85,7 +85,7 @@ public class Soldat extends Element implements ISoldat {
 	}
 
 	@Override
-	public void joueTour() {
+	public void joueTour(IConfig cfg) {
 		switch (mouvement) {
 		case DEPLACEMENT:
 			if (nextPosition.getElement() == null) {
@@ -99,7 +99,7 @@ public class Soldat extends Element implements ISoldat {
 			break;
 		case RIEN:
 		default:
-			setVie(Math.min(getVie() + IConfig.VIE_PAR_REGEN, getType().getPointsDeVie()));
+			setVie(Math.min(getVie() + cfg.getVieParRegen(), getType().getPointsDeVie()));
 			break;
 		}
 		mouvement = SoldatProchainMouvement.RIEN;

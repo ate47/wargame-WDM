@@ -14,19 +14,18 @@ public class FakeGameDrawer {
 	private static final Color SURCOUCHE = new Color(0x44000000, true);
 	private double shiftX, shiftY;
 	private double translateX, translateY;
-	private long lastTimeSet;
+	private Wargame game;
 
-	public FakeGameDrawer() {
+	public FakeGameDrawer(Wargame game) {
+		this.game = game;
 		double angle = Math.random() * Math.PI * 2;
 		double speed = Math.random() + 0.2;
 		shiftX = Math.cos(angle) * speed;
 		shiftY = Math.sin(angle) * speed;
-
-		lastTimeSet = System.currentTimeMillis();
 	}
 
-	protected void paintComponent(Graphics g, int width, int height) {
-		float partialSecond = calculatePartialSecond();
+	public void paint(Graphics g, int width, int height) {
+		float partialSecond = game.getPartialTick();
 		translateX += shiftX * partialSecond;
 		translateY += shiftY * partialSecond;
 		Shape oldClip = g.getClip();
@@ -73,16 +72,6 @@ public class FakeGameDrawer {
 		g.setColor(SURCOUCHE);
 		g.fillRect(0, 0, width, height);
 		g.setClip(oldClip);
-	}
-
-	/**
-	 * @return la difference entre le dernier appel de cette fonction et maintenant
-	 */
-	private float calculatePartialSecond() {
-		long current = System.currentTimeMillis();
-		long delta = current - lastTimeSet;
-		lastTimeSet = current;
-		return delta / 1_000F;
 	}
 
 }

@@ -37,7 +37,6 @@ public class PanneauRestauration extends JPanel {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		jeu.getFakeGameDrawer().paintComponent(g, getWidth(), getHeight());
-		repaint();
+		jeu.getFakeGameDrawer().paint(g, getWidth(), getHeight());
 	}
 }

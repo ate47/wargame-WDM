@@ -61,12 +61,15 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 
 	public PanneauJeu(Wargame carte) {
 		this.carte = carte;
-		zoom = Math.max(carte.getLargeur(), carte.getHauteur()) / 5;
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener(this);
 		addKeyListener(this);
 		setSize(800, 600);
+	}
+	
+	public void init() {
+		zoom = Math.max(carte.getLargeur(), carte.getHauteur()) / 5;
 	}
 
 	public int getUnit() {
@@ -341,6 +344,5 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 			}
 
 		g.translate(-translateX, -translateY);
-		repaint();
 	}
 }

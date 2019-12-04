@@ -1,12 +1,33 @@
 package wargame;
 
-public interface IConfig {
-	int LARGEUR_CARTE = 25;
-	int HAUTEUR_CARTE = 30; // en nombre de cases
-	int NB_PIX_CASE = 20;
-	int NB_HEROS = 6;
-	int NB_MONSTRES = 15;
-	int NB_OBSTACLES = LARGEUR_CARTE * HAUTEUR_CARTE / 4;
-	int VIE_PAR_REGEN = 7;
+import wargame.IType.Faction;
 
+public interface IConfig {
+	Faction getFactionJoueur();
+
+	int getHauteurCarte();
+
+	int getLargeurCarte();
+
+	int getNombreObstacle();
+
+	float getPourcentageObstacle();
+
+	int getVieParRegen();
+
+	boolean isShowFps();
+
+	boolean isShowingFPS();
+
+	void setFactionJoueur(Faction factionJoueur);
+
+	void setHauteurCarte(int hauteurCarte);
+
+	void setLargeurCarte(int largeurCarte);
+
+	void setPourcentageObstacle(float pourcentageObstacle);
+
+	void setShowFps(boolean showFps);
+
+	void setVieParRegen(int vieParRegen);
 }

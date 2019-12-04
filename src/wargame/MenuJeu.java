@@ -88,13 +88,12 @@ public class MenuJeu extends JPanel {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		jeu.getFakeGameDrawer().paintComponent(g, getWidth(), getHeight());
+		jeu.getFakeGameDrawer().paint(g, getWidth(), getHeight());
 		int sizeX = getWidth() / 3;
 		int sizeY = sizeX * 2 / 5;
 		int decalage = getHeight() / 50;
 		g.drawImage(LOGO.getImageFromTime(), (getWidth() - sizeX) / 2, getHeight() / 3 - (sizeY + decalage), sizeX,
 				sizeY, this);
-		repaint();
 	}
 
 }

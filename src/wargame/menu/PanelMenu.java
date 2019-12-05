@@ -5,12 +5,13 @@ import java.awt.Graphics;
 import java.awt.Shape;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import wargame.ListenerAdapter;
 import wargame.Obstacle;
 import wargame.PanneauJeu;
 import wargame.Wargame;
@@ -20,9 +21,9 @@ import wargame.utils.WargameUtils;
 /**
  * Dessinateur de faux jeu
  */
-public class PanelMenu extends JPanel implements ComponentListener {
+public class PanelMenu extends JPanel implements ListenerAdapter {
 	private static final long serialVersionUID = -6212292517967101515L;
-	private static final Color SURCOUCHE = new Color(0x44000000, true);
+	private static final Color SURCOUCHE = new Color(0x66000000, true);
 	private static double shiftX, shiftY;
 	private static double translateX, translateY;
 	static {
@@ -41,6 +42,7 @@ public class PanelMenu extends JPanel implements ComponentListener {
 		this.game = game;
 		this.components = new JComponent[buttons];
 		addComponentListener(this);
+		addMouseListener(this);
 		setPreferredSize(game.getFrame().getRootPane().getSize());
 	}
 
@@ -88,7 +90,7 @@ public class PanelMenu extends JPanel implements ComponentListener {
 		int translateXEnd = (int) (translateXStart + width * 1F / unit) + 4;
 		int translateYStart = -(int) (PanelMenu.translateY / 0.6666F) - 2;
 		int translateYEnd = (int) (translateYStart + height / 0.6666F / unit) + 4;
-		int i, j, x, y;
+		int i, j, x, y, seed;
 		g.translate((int) (translateX * unit), (int) (translateY * unit));
 		for (i = translateXStart; i < translateXEnd; i++)
 			for (j = translateYStart; j < translateYEnd; j++) {
@@ -100,7 +102,7 @@ public class PanelMenu extends JPanel implements ComponentListener {
 					y = (int) ((0.6666F * j) * unit);
 				}
 
-				int seed = i * j;
+				seed = (i * j) % (5 * 4 * 3 * 2);
 				switch (seed % 5) {
 				case 1: // Soldat
 					g.drawImage(PanneauJeu.GRASS.getImageFromPosition(i, i), x, y, unit, unit, null);
@@ -122,6 +124,12 @@ public class PanelMenu extends JPanel implements ComponentListener {
 		g.setColor(SURCOUCHE);
 		g.fillRect(0, 0, width, height);
 		g.setClip(oldClip);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		shiftX = 1 - ((double) e.getX()) * 2 / getWidth();
+		shiftY = 1 - ((double) e.getY()) * 2 / getHeight();
 	}
 
 	@Override

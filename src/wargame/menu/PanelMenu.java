@@ -11,10 +11,10 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import wargame.IType.Faction;
 import wargame.Obstacle;
 import wargame.PanneauJeu;
 import wargame.Wargame;
+import wargame.config.Faction;
 import wargame.utils.WargameUtils;
 
 /**

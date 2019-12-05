@@ -2,8 +2,6 @@ package wargame.config;
 
 import java.io.Serializable;
 
-import wargame.IType.Faction;
-
 public class Config implements IConfig, Serializable {
 
 	private static final long serialVersionUID = 9194042623694545614L;

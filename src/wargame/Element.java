@@ -1,6 +1,7 @@
 package wargame;
 
 import wargame.ICarte.ICase;
+import wargame.assets.ImageAsset;
 
 public class Element {
 	private ImageAsset asset;

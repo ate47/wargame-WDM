@@ -1,6 +1,9 @@
 package wargame.config;
 
-public enum Difficulty {
+import wargame.assets.IIconObject;
+import wargame.assets.ImageAsset;
+
+public enum Difficulty implements IIconObject {
 
 	EASY("Facile", 1, 2F, 0.75F),
 
@@ -13,12 +16,15 @@ public enum Difficulty {
 	private int areaCount;
 	private float vie, ennemis;
 	private String name;
+	private ImageAsset icon, iconHover;
 
 	Difficulty(String name, int areaCount, float vie, float ennemis) {
 		this.name = name;
 		this.areaCount = areaCount;
 		this.vie = vie;
 		this.ennemis = ennemis;
+		this.icon = new ImageAsset("map/difficulty_" + name().toLowerCase() + ".png");
+		this.iconHover = new ImageAsset("map/difficulty_" + name().toLowerCase() + "_hover.png");
 	}
 
 	public String getName() {
@@ -35,5 +41,15 @@ public enum Difficulty {
 
 	public float getMultiplicateurEnnemis() {
 		return ennemis;
+	}
+
+	@Override
+	public ImageAsset getIcon() {
+		return icon;
+	}
+
+	@Override
+	public ImageAsset getIconHover() {
+		return iconHover;
 	}
 }

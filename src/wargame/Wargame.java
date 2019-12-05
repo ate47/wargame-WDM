@@ -13,15 +13,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Random;
 
-import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
 import javax.swing.Timer;
 
-import wargame.IType.Faction;
+import wargame.assets.ImageAsset;
 import wargame.config.Config;
+import wargame.config.Faction;
 import wargame.config.IConfig;
 import wargame.menu.MenuButton;
 import wargame.menu.MenuJeu;
@@ -265,11 +265,7 @@ public class Wargame implements ICarte {
 
 		frame.setContentPane(menu);
 
-		try {
-			frame.setIconImage(ImageIO.read(Wargame.class.getResourceAsStream("ico.png")));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		frame.setIconImage(new ImageAsset("ico.png").getImages()[0]);
 	}
 
 	@Override

@@ -1,7 +1,5 @@
 package wargame.config;
 
-import wargame.IType.Faction;
-
 public interface IConfig {
 	public MapSize getMapSize();
 

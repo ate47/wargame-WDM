@@ -4,8 +4,8 @@ import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import wargame.ImageAsset;
 import wargame.Wargame;
+import wargame.assets.ImageAsset;
 
 public class MenuJeu extends PanelMenu {
 	private static final ImageAsset LOGO = new ImageAsset("logo.png");

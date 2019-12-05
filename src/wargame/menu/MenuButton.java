@@ -8,7 +8,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.JButton;
 
-import wargame.ImageAsset;
+import wargame.assets.ImageAsset;
 import wargame.utils.WargameUtils;
 
 public class MenuButton extends JButton implements MouseListener {

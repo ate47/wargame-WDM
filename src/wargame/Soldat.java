@@ -6,7 +6,7 @@ import wargame.config.IConfig;
 public class Soldat extends Element implements ISoldat {
 	public static boolean rechercheSequentielle(ICase[] tableau, Soldat element) {
 		for (ICase c : tableau) {
-			if (element.equals(c.getElement()))
+			if (c != null && element.equals(c.getElement()))
 				return true;
 		}
 		return false;
@@ -40,20 +40,22 @@ public class Soldat extends Element implements ISoldat {
 		if (soldat.estMort())
 			return;
 
-		// coup
+		// Coup
 		des = (int) (Math.random() * this.getType().getPuissance());
 
 		soldat.setVie(Math.max(0, soldat.getVie() - des));
-
+		
 		// Riposte
 		if (!soldat.estMort()) {
 			des = 0;
-			if (rechercheSequentielle(getPosition().visible(1), this))
+			if (rechercheSequentielle(soldat.getPosition().visible(1), this))
 				des = (int) (Math.random() * soldat.getType().getPuissance());
-			else if (rechercheSequentielle(getPosition().visible(soldat.getType().getPorteeVisuelle()), this))
+			else if (rechercheSequentielle(soldat.getPosition().visible(soldat.getType().getPorteeVisuelle()), this))
 				des = (int) (Math.random() * soldat.getType().getTir());
 			this.setVie(Math.max(0, this.getVie() - des));
 		}
+		
+
 	}
 
 	@Override
@@ -100,7 +102,8 @@ public class Soldat extends Element implements ISoldat {
 			break;
 		case RIEN:
 		default:
-			setVie(Math.min(getVie() + (int) (cfg.getVieParRegen() * cfg.getDifficulty().getMultiplicateurVie()), getType().getPointsDeVie()));
+			setVie(Math.min(getVie() + (int) (cfg.getVieParRegen() * cfg.getDifficulty().getMultiplicateurVie()),
+					getType().getPointsDeVie()));
 			break;
 		}
 		mouvement = SoldatProchainMouvement.RIEN;
@@ -140,6 +143,66 @@ public class Soldat extends Element implements ISoldat {
 		this.vie = vie;
 		if (this.vie == 0)
 			mort();
+	}
+
+	public void choixIA() {
+		ICase[] vision;
+		Element e;
+		boolean chercherpos = true;
+		ICase pos;
+		int test;
+
+		if (estMort())
+			return;
+
+		// cases ciblables
+			vision = this.getPosition().visible(this.getType().getPorteeVisuelle());
+
+		// L'IA cherche un ennemis à taper dans sa vision
+		for (ICase c : vision) {
+			if (c != null) {
+				e = c.getElement();
+				if (e instanceof Soldat) {
+					if (((Soldat) e).getType().getFaction() != this.getType().getFaction()) {
+						try {
+							this.seBat((Soldat) e);
+						} catch (IllegalMoveException e1) {
+							e1.printStackTrace();
+						}
+						return;
+					}
+
+				}
+			}
+		}
+
+		/*
+		 * l'IA se soigne si elle est en danger
+		 */
+		if (this.getVie() < this.getType().getPointsDeVie() * 0.25F) {
+			try {
+				this.seRegen();
+			} catch (IllegalMoveException e1) {
+				e1.printStackTrace();
+			}
+			return;
+		}
+
+		/*
+		 * Cherche une vide pour se déplacer
+		 */
+
+		while (chercherpos) {
+			pos = vision[(int) (Math.random() * vision.length)];
+			if(pos != null && pos.getElement() == null) {
+				try {
+					seDeplace(pos);
+					chercherpos = false;
+				} catch (IllegalMoveException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
 	}
 
 }

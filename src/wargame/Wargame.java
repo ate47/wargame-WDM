@@ -24,6 +24,7 @@ import wargame.IType.Faction;
 import wargame.config.Config;
 import wargame.config.IConfig;
 import wargame.menu.MenuButton;
+import wargame.menu.MenuFin;
 import wargame.menu.MenuJeu;
 
 public class Wargame implements ICarte {
@@ -96,6 +97,9 @@ public class Wargame implements ICarte {
 						} catch (IllegalMoveException e1) {
 							e1.printStackTrace();
 						}
+						for (Case c : visibles)
+							if (c != null)
+								c.accessible = false;
 
 						soldat = null;
 						s = null;
@@ -225,7 +229,8 @@ public class Wargame implements ICarte {
 
 	private PanneauJeu panneau;
 	private MenuJeu menu;
-
+	private MenuFin menuFin;
+	
 	private IConfig config;
 
 	private JFrame frame;
@@ -239,7 +244,11 @@ public class Wargame implements ICarte {
 	private Case[] visibles;
 	private Soldat soldat;
 	private JButton finTour;
-
+	private static final int PERDU = 1;
+	private static final int GAGNE = 2;
+	private static final int NON = 3;
+	
+	
 	public Wargame() {
 		frame = new GameFrame("Wargame");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -253,6 +262,13 @@ public class Wargame implements ICarte {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				jouerSoldats();
+				jouerIA();
+				 /*switch(estfinie()) {
+				case PERDU :menuFin = new MenuFin (Wargame.this,PERDU);break;
+				case GAGNE :menuFin = new MenuFin(Wargame.this, GAGNE);break;
+				case NON : ;
+				default : ;	
+				}*/
 			}
 		});
 
@@ -497,6 +513,17 @@ public class Wargame implements ICarte {
 		panneau.repaint();
 	}
 
+	private void jouerIA() {
+		int i;
+		for (Soldat s : soldatEnnemis)
+			s.choixIA();
+
+		for (Soldat s : soldatEnnemis) {
+			s.joueTour(config);
+		}
+		panneau.repaint();
+	}
+
 	public void lancerJeu() {
 		readConfig();
 
@@ -655,6 +682,25 @@ public class Wargame implements ICarte {
 		lastFPSTime = System.currentTimeMillis();
 		partialTick = (lastFPSTime - debFPSTime) / 1000F;
 		fps = (1 / partialTick);
+	}
+	
+	public boolean tousMort(Soldat lesSoldats[]) {
+		for(Soldat s : lesSoldats) {
+			if (!s.estMort()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public int estfinie() {
+		if(this.tousMort(soldatJoueur)) {
+			return PERDU;
+		}
+		if(this.tousMort(soldatEnnemis)) {
+			return GAGNE;
+		}
+		return NON;
 	}
 
 }

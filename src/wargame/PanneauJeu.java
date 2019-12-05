@@ -14,6 +14,7 @@ import java.awt.event.MouseWheelEvent;
 import javax.swing.JPanel;
 
 import wargame.ICarte.ICase;
+import wargame.assets.ImageAsset;
 import wargame.utils.WargameUtils;
 
 public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {

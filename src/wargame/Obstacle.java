@@ -1,5 +1,7 @@
 package wargame;
 
+import wargame.assets.ImageAsset;
+
 public class Obstacle extends Element {
 
 	public enum TypeObstacle {

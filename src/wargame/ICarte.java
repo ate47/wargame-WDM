@@ -1,7 +1,7 @@
 package wargame;
 
-import wargame.IType.Faction;
 import wargame.Wargame.Case;
+import wargame.config.Faction;
 
 /**
  * Represente une carte de jeu

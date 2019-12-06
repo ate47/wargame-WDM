@@ -20,13 +20,9 @@ public class MenuNouvellePartie extends PanelMenu {
 		this.jeu = jeu;
 		IConfig old = jeu.getConfig().clone();
 
-//		 Choisir taille carte (Grand/moyen/petit)
-//		 -> augmente nb ennemis/alliés
-//		 Choisir pourcentage d'obstacle
-
-		addComponend(new SelectionButtonsPanel<>(Faction.values(), "Faction du joueur", jeu.getConfig()::setFactionJoueur, jeu.getConfig()::getFactionJoueur));
-		addComponend(new SelectionButtonsPanel<>(Difficulty.values(), "Difficulté", jeu.getConfig()::setDifficulty, jeu.getConfig()::getDifficulty));
-		addComponend(new SelectionButtonsPanel<>(MapSize.values(), "Taille de la carte", jeu.getConfig()::setMapSize, jeu.getConfig()::getMapSize));
+		addComponent(new SelectionButtonsPanel<>(Faction.values(), "Faction du joueur", jeu.getConfig()::setFactionJoueur, jeu.getConfig()::getFactionJoueur));
+		addComponent(new SelectionButtonsPanel<>(Difficulty.values(), "Difficulté", jeu.getConfig()::setDifficulty, jeu.getConfig()::getDifficulty));
+		addComponent(new SelectionButtonsPanel<>(MapSize.values(), "Taille de la carte", jeu.getConfig()::setMapSize, jeu.getConfig()::getMapSize));
 
 		addButton("Lancer", new ActionListener() {
 

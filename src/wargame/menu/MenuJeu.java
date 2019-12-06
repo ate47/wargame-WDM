@@ -27,7 +27,7 @@ public class MenuJeu extends PanelMenu {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				jeu.getFrame().setContentPane(new MenuFin(jeu, 0));
+				jeu.getFrame().setContentPane(new MenuFin(jeu, false));
 				jeu.getFrame().pack();
 			}
 		});

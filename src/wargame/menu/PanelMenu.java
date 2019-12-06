@@ -63,15 +63,15 @@ public class PanelMenu extends JPanel implements ListenerAdapter {
 	protected void addButton(String text, ActionListener listener) {
 		JButton button = new MenuButton(text);
 		button.addActionListener(listener);
-		addComponend(button);
+		addComponent(button);
 	}
 
 	protected void addLabel(String text) {
 		JButton button = new MenuButton(text, null, null);
-		addComponend(button);
+		addComponent(button);
 	}
 
-	protected void addComponend(JComponent component) {
+	protected void addComponent(JComponent component) {
 		int sizeX = 2 * getWidth() / 5;
 		int sizeY = getHeight() / 10;
 		int decalage = getHeight() / 50;

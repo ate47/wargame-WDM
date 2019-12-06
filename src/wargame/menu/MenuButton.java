@@ -9,6 +9,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JButton;
 
 import wargame.assets.ImageAsset;
+import wargame.assets.SoundAsset;
 import wargame.utils.WargameUtils;
 
 public class MenuButton extends JButton implements MouseListener {
@@ -21,6 +22,7 @@ public class MenuButton extends JButton implements MouseListener {
 	private static final Color SELECTED_BORDER = new Color(SELECTED.getRGB());
 	private static final ImageAsset BUTTON_IMAGE = new ImageAsset("button.png");
 	private static final ImageAsset BUTTON_IMAGE_HOVER = new ImageAsset("button_hover.png");
+	public static final SoundAsset CLIQUE_BOUTON = new SoundAsset("Epee.wav");
 	private boolean mouseIn = false;
 	private boolean used = false;
 	private ImageAsset image;
@@ -50,7 +52,9 @@ public class MenuButton extends JButton implements MouseListener {
 	public void mouseClicked(MouseEvent e) {}
 
 	@Override
-	public void mousePressed(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {
+		CLIQUE_BOUTON.play();
+	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {

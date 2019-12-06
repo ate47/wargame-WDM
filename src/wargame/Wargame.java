@@ -30,6 +30,10 @@ import wargame.menu.MenuFin;
 import wargame.menu.MenuJeu;
 
 public class Wargame implements ICarte {
+	public enum FinJeu {
+		GAGNE, PERDU, EN_COURS
+	}
+
 	public class Case implements ICase {
 		private boolean visible, visite, accessible;
 		private Element e;
@@ -225,15 +229,11 @@ public class Wargame implements ICarte {
 
 	public static final File SAVE_FILE = new File("wargame.cfg");
 	public static final SoundAsset MUSIQUE_JEU = new SoundAsset("ambiance.wav");
-	public static final int PERDU = 1;
-	public static final int GAGNE = 2;
-
-	public static final int NON = 3;
 
 	private long lastFPSTime = System.currentTimeMillis();
 	private float partialTick = 0F;
 	private float fps;
-	
+
 	private PanneauJeu panneau;
 
 	private MenuJeu menu;
@@ -269,16 +269,13 @@ public class Wargame implements ICarte {
 
 				switch (estfinie()) {
 				case PERDU:
-					menuFin = new MenuFin(Wargame.this, PERDU);
-					frame.setContentPane(menuFin);
-					frame.pack();
+					menuFin = new MenuFin(Wargame.this, false);
+					showMenu(menuFin);
 					break;
 				case GAGNE:
-					menuFin = new MenuFin(Wargame.this, GAGNE);
-					frame.setContentPane(menuFin);
-					frame.pack();
+					menuFin = new MenuFin(Wargame.this, true);
+					showMenu(menuFin);
 					break;
-				case NON:
 				default:
 					;
 				}
@@ -304,14 +301,14 @@ public class Wargame implements ICarte {
 		e.setPosition(c);
 	}
 
-	public int estfinie() {
-		if(this.tousMort(soldatJoueur)) {
-			return PERDU;
-		}
-		if(this.tousMort(soldatEnnemis)) {
-			return GAGNE;
-		}
-		return NON;
+	public FinJeu estfinie() {
+		if (this.tousMort(soldatJoueur))
+			return FinJeu.PERDU;
+
+		if (this.tousMort(soldatEnnemis))
+			return FinJeu.GAGNE;
+		
+		return FinJeu.EN_COURS;
 	}
 
 	@Override
@@ -465,7 +462,7 @@ public class Wargame implements ICarte {
 	public int getHauteur() {
 		return sy;
 	}
-	
+
 	/*
 	 * 
 	 */
@@ -545,7 +542,7 @@ public class Wargame implements ICarte {
 		frame.pack();
 		frame.setVisible(true);
 		MUSIQUE_JEU.loop();
-		
+
 		/* sync des fps */
 		new Timer(1000 / 60, new ActionListener() {
 
@@ -603,7 +600,7 @@ public class Wargame implements ICarte {
 	}
 
 	public boolean tousMort(Soldat lesSoldats[]) {
-		for(Soldat s : lesSoldats) {
+		for (Soldat s : lesSoldats) {
 			if (!s.estMort()) {
 				return false;
 			}
@@ -694,7 +691,7 @@ public class Wargame implements ICarte {
 
 		return cases;
 	}
-	
+
 	public void writeConfig() {
 		System.out.println("Ecriture de " + SAVE_FILE.getAbsolutePath() + "... ");
 		try (FileOutputStream out = new FileOutputStream(SAVE_FILE)) {
@@ -706,7 +703,7 @@ public class Wargame implements ICarte {
 				System.exit(0);
 		}
 	}
-	
+
 	private void jouerIA() {
 		for (Soldat s : soldatEnnemis)
 			s.choixIA();
@@ -716,7 +713,7 @@ public class Wargame implements ICarte {
 		}
 		panneau.repaint();
 	}
-	
+
 	private void startFrame() {
 		long debFPSTime = lastFPSTime;
 		lastFPSTime = System.currentTimeMillis();

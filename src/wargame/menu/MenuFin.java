@@ -1,11 +1,7 @@
 package wargame.menu;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JLabel;
 
 import wargame.Wargame;
 
@@ -15,44 +11,27 @@ public class MenuFin extends PanelMenu {
 	 * 
 	 */
 	private static final long serialVersionUID = 4791070228793887590L;
-	
-	//private JLabel finie;
-	
-	public MenuFin(Wargame jeu, int fin) {
+
+	// private JLabel finie;
+
+	public MenuFin(Wargame jeu, boolean gagne) {
 		super(jeu, 4);
-		
-		switch(fin) {
-		case Wargame.GAGNE:
-			addLabel("Vous avez gagne !");
-			break;
-		case Wargame.PERDU:
-			addLabel("Vous avez perdu !");
-			break;
-		default:
-			addLabel("Vous etes arrivés là!");
-		}
-		
-	
-		
-		
-		
+
+		addLabel(gagne ? "Vous avez gagne !" : "Vous avez perdu !");
+
 		addButton("Rejouer", new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				/*
-				jeu.getFrame().setContentPane(new MenuNouvellePartie(jeu));
-				jeu.getFrame().pack();
-				*/
+				jeu.showMenu(new MenuNouvellePartie(jeu));
 			}
 		});
-		
+
 		addButton("Menu", new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				jeu.getFrame().setContentPane(jeu.getMenuJeu());
-				jeu.getFrame().pack();
+				jeu.showMenu(jeu.getMenuJeu());
 			}
 		});
 

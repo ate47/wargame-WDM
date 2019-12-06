@@ -20,6 +20,7 @@ import javax.swing.JRootPane;
 import javax.swing.Timer;
 
 import wargame.assets.ImageAsset;
+import wargame.assets.SoundAsset;
 import wargame.config.Config;
 import wargame.config.Faction;
 import wargame.config.IConfig;
@@ -222,6 +223,7 @@ public class Wargame implements ICarte {
 	}
 
 	public static final File SAVE_FILE = new File("wargame.cfg");
+	public static final SoundAsset MUSIQUE_JEU = new SoundAsset("ambiance.wav");
 	private long lastFPSTime = System.currentTimeMillis();
 	private float partialTick = 0F;
 
@@ -524,7 +526,8 @@ public class Wargame implements ICarte {
 
 		frame.pack();
 		frame.setVisible(true);
-
+		MUSIQUE_JEU.loop();
+		
 		/* sync des fps */
 		new Timer(1000 / 60, new ActionListener() {
 

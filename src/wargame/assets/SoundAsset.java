@@ -7,21 +7,17 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineEvent;
-import javax.sound.sampled.LineEvent.Type;
-import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
  * Represente un son du jeu
  */
-public class SoundAsset implements LineListener {
+public class SoundAsset {
 	/**
 	 * Clip audio
 	 */
 	private Clip audioClip;
-	private boolean loop;
 
 	/**
 	 * construit un son de jeu avec le liens d'un son
@@ -30,14 +26,12 @@ public class SoundAsset implements LineListener {
 	 */
 	public SoundAsset(String sound) {
 		try {
-			AudioInputStream audioStream = AudioSystem.getAudioInputStream(SoundAsset.class.getResource(sound));
+			AudioInputStream audioStream = AudioSystem.getAudioInputStream(SoundAsset.class.getResource("sound/"+sound));
 
 			AudioFormat format = audioStream.getFormat();
 
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
-
 			audioClip = (Clip) AudioSystem.getLine(info);
-			audioClip.addLineListener(this);
 			audioClip.open(audioStream);
 			audioStream.close();
 		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException | NullPointerException e) {
@@ -49,15 +43,13 @@ public class SoundAsset implements LineListener {
 	 * boucler le son
 	 */
 	public void loop() {
-		loop = true;
-		audioClip.start();
+		audioClip.loop(Clip.LOOP_CONTINUOUSLY);
 	}
 
 	/**
 	 * joue le son
 	 */
 	public void play() {
-		loop = true;
 		audioClip.setMicrosecondPosition(0L);
 		audioClip.start();
 	}
@@ -66,17 +58,7 @@ public class SoundAsset implements LineListener {
 	 * coupe le son
 	 */
 	public void stop() {
-		loop = false;
 		audioClip.stop();
-	}
-
-	@Override
-	public void update(LineEvent event) {
-		Type v = event.getType();
-		if (v == Type.STOP && loop) {
-			audioClip.setMicrosecondPosition(0L);
-			audioClip.start();
-		}
 	}
 
 }

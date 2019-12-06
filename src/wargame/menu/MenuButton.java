@@ -77,19 +77,22 @@ public class MenuButton extends JButton implements MouseListener {
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		if (mouseIn) {
-			if (imageHover == null) {
+		if (image != null) {
+			if (mouseIn) {
+				if (imageHover == null) {
+					g.drawImage((image).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
+					g.setColor(HOVER);
+					g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+				} else
+					g.drawImage((imageHover).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
+				g.setColor(textHover);
+			} else {
 				g.drawImage((image).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
-				g.setColor(HOVER);
-				g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
-			} else
-				g.drawImage((imageHover).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
-			g.setColor(textHover);
+				g.setColor(text);
+			}
 		} else {
-			g.drawImage((image).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
 			g.setColor(text);
 		}
-
 		if (used) {
 			g.setColor(SELECTED);
 			g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);

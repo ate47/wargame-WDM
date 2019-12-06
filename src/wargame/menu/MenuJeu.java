@@ -27,7 +27,8 @@ public class MenuJeu extends PanelMenu {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO
+				jeu.getFrame().setContentPane(new MenuFin(jeu, 0));
+				jeu.getFrame().pack();
 			}
 		});
 		addButton("Charger une partie", new ActionListener() {

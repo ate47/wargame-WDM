@@ -230,7 +230,7 @@ public class Wargame implements ICarte {
 	private PanneauJeu panneau;
 	private MenuJeu menu;
 	private MenuFin menuFin;
-	
+
 	private IConfig config;
 
 	private JFrame frame;
@@ -247,8 +247,7 @@ public class Wargame implements ICarte {
 	public static final int PERDU = 1;
 	public static final int GAGNE = 2;
 	public static final int NON = 3;
-	
-	
+
 	public Wargame() {
 		frame = new GameFrame("Wargame");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -263,12 +262,22 @@ public class Wargame implements ICarte {
 			public void actionPerformed(ActionEvent arg0) {
 				jouerSoldats();
 				jouerIA();
-				 /*switch(estfinie()) {
-				case PERDU :menuFin = new MenuFin (Wargame.this,PERDU);break;
-				case GAGNE :menuFin = new MenuFin(Wargame.this, GAGNE);break;
-				case NON : ;
-				default : ;	
-				}*/
+
+				switch (estfinie()) {
+				case PERDU:
+					menuFin = new MenuFin(Wargame.this, PERDU);
+					frame.setContentPane(menuFin);
+					frame.pack();
+					break;
+				case GAGNE:
+					menuFin = new MenuFin(Wargame.this, GAGNE);
+					frame.setContentPane(menuFin);
+					frame.pack();
+					break;
+				case NON:
+				default:
+					;
+				}
 			}
 		});
 
@@ -441,6 +450,13 @@ public class Wargame implements ICarte {
 	@Override
 	public int getHauteur() {
 		return sy;
+	}
+	
+	/*
+	 * 
+	 */
+	public MenuJeu getMenuJeu() {
+		return menu;
 	}
 
 	/**
@@ -679,21 +695,21 @@ public class Wargame implements ICarte {
 		partialTick = (lastFPSTime - debFPSTime) / 1000F;
 		fps = (1 / partialTick);
 	}
-	
+
 	public boolean tousMort(Soldat lesSoldats[]) {
-		for(Soldat s : lesSoldats) {
+		for (Soldat s : lesSoldats) {
 			if (!s.estMort()) {
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	public int estfinie() {
-		if(this.tousMort(soldatJoueur)) {
+		if (this.tousMort(soldatJoueur)) {
 			return PERDU;
 		}
-		if(this.tousMort(soldatEnnemis)) {
+		if (this.tousMort(soldatEnnemis)) {
 			return GAGNE;
 		}
 		return NON;

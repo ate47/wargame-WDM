@@ -66,6 +66,11 @@ public class PanelMenu extends JPanel implements ListenerAdapter {
 		addComponend(button);
 	}
 
+	protected void addLabel(String text) {
+		JButton button = new MenuButton(text, null, null);
+		addComponend(button);
+	}
+
 	protected void addComponend(JComponent component) {
 		int sizeX = 2 * getWidth() / 5;
 		int sizeY = getHeight() / 10;
@@ -139,12 +144,15 @@ public class PanelMenu extends JPanel implements ListenerAdapter {
 	}
 
 	@Override
-	public void componentMoved(ComponentEvent e) {}
+	public void componentMoved(ComponentEvent e) {
+	}
 
 	@Override
-	public void componentShown(ComponentEvent e) {}
+	public void componentShown(ComponentEvent e) {
+	}
 
 	@Override
-	public void componentHidden(ComponentEvent e) {}
+	public void componentHidden(ComponentEvent e) {
+	}
 
 }

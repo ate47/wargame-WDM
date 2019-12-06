@@ -7,6 +7,8 @@ import wargame.assets.ImageAsset;
  */
 public class Obstacle extends Element {
 
+	private static final long serialVersionUID = 5726626684822956694L;
+
 	public enum TypeObstacle {
 		ROCHER(new ImageAsset("rock0.png")), FORET(new ImageAsset("foret.png")), EAU(new ImageAsset("eau0.png"));
 		public static TypeObstacle getObstacleAlea() {

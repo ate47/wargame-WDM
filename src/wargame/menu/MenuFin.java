@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import wargame.Wargame;
+import wargame.Wargame.FinJeu;
 
 public class MenuFin extends PanelMenu {
 
@@ -12,12 +13,12 @@ public class MenuFin extends PanelMenu {
 	 */
 	private static final long serialVersionUID = 4791070228793887590L;
 
-	// private JLabel finie;
-
-	public MenuFin(Wargame jeu, boolean gagne) {
+	public MenuFin(Wargame jeu) {
 		super(jeu, 4);
-
-		addLabel(gagne ? "Vous avez gagne !" : "Vous avez perdu !");
+	}
+	@Override
+	public void init() {
+		addLabel(jeu.getCourant() == FinJeu.GAGNE ? "Vous avez gagne !" : "Vous avez perdu !");
 
 		addButton("Rejouer", new ActionListener() {
 
@@ -31,7 +32,7 @@ public class MenuFin extends PanelMenu {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				jeu.showMenu(jeu.getMenuJeu());
+				jeu.showMenu(jeu.getMenu());
 			}
 		});
 

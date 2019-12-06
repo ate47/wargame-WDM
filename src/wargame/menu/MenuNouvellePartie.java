@@ -13,16 +13,20 @@ public class MenuNouvellePartie extends PanelMenu {
 
 	private static final long serialVersionUID = 9098817428626585291L;
 
-	protected final Wargame jeu;
-
 	public MenuNouvellePartie(Wargame jeu) {
 		super(jeu, 5);
-		this.jeu = jeu;
+	}
+
+	@Override
+	public void init() {
 		IConfig old = jeu.getConfig().clone();
 
-		addComponent(new SelectionButtonsPanel<>(Faction.values(), "Faction du joueur", jeu.getConfig()::setFactionJoueur, jeu.getConfig()::getFactionJoueur));
-		addComponent(new SelectionButtonsPanel<>(Difficulty.values(), "Difficulté", jeu.getConfig()::setDifficulty, jeu.getConfig()::getDifficulty));
-		addComponent(new SelectionButtonsPanel<>(MapSize.values(), "Taille de la carte", jeu.getConfig()::setMapSize, jeu.getConfig()::getMapSize));
+		addComponent(new SelectionButtonsPanel<>(Faction.values(), "Faction du joueur",
+				jeu.getConfig()::setFactionJoueur, jeu.getConfig()::getFactionJoueur));
+		addComponent(new SelectionButtonsPanel<>(Difficulty.values(), "Difficulté", jeu.getConfig()::setDifficulty,
+				jeu.getConfig()::getDifficulty));
+		addComponent(new SelectionButtonsPanel<>(MapSize.values(), "Taille de la carte", jeu.getConfig()::setMapSize,
+				jeu.getConfig()::getMapSize));
 
 		addButton("Lancer", new ActionListener() {
 
@@ -42,6 +46,5 @@ public class MenuNouvellePartie extends PanelMenu {
 				jeu.showMenu(jeu.getMenu());
 			}
 		});
-
 	}
 }

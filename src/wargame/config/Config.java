@@ -2,8 +2,12 @@ package wargame.config;
 
 import java.io.Serializable;
 
-public class Config implements IConfig, Serializable {
+import wargame.ICase;
+import wargame.Soldat;
+import wargame.Wargame.FinJeu;
+import wargame.utils.WargameUtils;
 
+public class Config implements IConfig, Serializable {
 	private static final long serialVersionUID = 9194042623694545614L;
 	private static final int vieParRegen = 70;
 	private boolean showFps = false;
@@ -13,6 +17,12 @@ public class Config implements IConfig, Serializable {
 	private Faction factionJoueur = Faction.BLANC;
 	private Difficulty difficulty = Difficulty.NORMAL;
 	private MapSize mapSize = MapSize.NORMAL;
+
+	private Faction factionEnnemi = Faction.VERT;
+	private FinJeu courant = FinJeu.EN_COURS;
+	private Soldat[] soldatJoueur = new Soldat[factionJoueur.nombreGenere()];
+	private Soldat[] soldatEnnemis = new Soldat[factionEnnemi.nombreGenere()];
+	private ConfigCase[][] carte = new ConfigCase[largeurCarte][hauteurCarte];
 
 	public Config() {}
 
@@ -24,6 +34,13 @@ public class Config implements IConfig, Serializable {
 		this.factionJoueur = old.factionJoueur;
 		this.difficulty = old.difficulty;
 		this.mapSize = old.mapSize;
+		this.factionEnnemi = old.factionEnnemi;
+		this.courant = old.courant;
+		this.soldatJoueur = old.soldatJoueur == null ? null
+				: WargameUtils.arrayCloneSub(old.soldatJoueur, old.soldatJoueur.length, 1);
+		this.soldatEnnemis = old.soldatJoueur == null ? null
+				: WargameUtils.arrayCloneSub(old.soldatEnnemis, old.soldatEnnemis.length, 1);
+		this.carte = old.soldatJoueur == null ? null : WargameUtils.arrayCloneSub(old.carte, old.carte.length, 2);
 	}
 
 	@Override
@@ -32,8 +49,21 @@ public class Config implements IConfig, Serializable {
 	}
 
 	@Override
+	public ConfigCase[][] getCarte() {
+		return carte;
+	}
+
+	public FinJeu getCourant() {
+		return courant;
+	}
+
+	@Override
 	public Difficulty getDifficulty() {
 		return difficulty;
+	}
+
+	public Faction getFactionEnnemi() {
+		return factionEnnemi;
 	}
 
 	@Override
@@ -52,6 +82,11 @@ public class Config implements IConfig, Serializable {
 	}
 
 	@Override
+	public MapSize getMapSize() {
+		return mapSize;
+	}
+
+	@Override
 	public int getNombreObstacle() {
 		return (int) (getLargeurCarte() * getHauteurCarte() * getPourcentageObstacle());
 	}
@@ -59,6 +94,19 @@ public class Config implements IConfig, Serializable {
 	@Override
 	public float getPourcentageObstacle() {
 		return pourcentageObstacle;
+	}
+
+	public Soldat[] getSoldatEnnemis() {
+		return soldatEnnemis;
+	}
+
+	public Soldat[] getSoldatJoueur() {
+		return soldatJoueur;
+	}
+
+	@Override
+	public int getVieparregen() {
+		return vieParRegen;
 	}
 
 	@Override
@@ -77,13 +125,31 @@ public class Config implements IConfig, Serializable {
 	}
 
 	@Override
+	public void setCarte(ICase[][] carte) {
+		this.carte = new ConfigCase[carte.length][carte[0].length];
+		int i, j;
+		for (i = 0; i < 0; i++)
+			for (j = 0; j < 0; j++)
+				this.carte[i][j] = new ConfigCase(carte[i][j]);
+	}
+
+	public void setCourant(FinJeu courant) {
+		this.courant = courant;
+	}
+
+	@Override
 	public void setDifficulty(Difficulty d) {
 		difficulty = d;
+	}
+
+	public void setFactionEnnemi(Faction factionEnnemi) {
+		this.factionEnnemi = factionEnnemi;
 	}
 
 	@Override
 	public void setFactionJoueur(Faction factionJoueur) {
 		this.factionJoueur = factionJoueur;
+		setFactionEnnemi(factionJoueur.getOthers());
 	}
 
 	@Override
@@ -97,6 +163,11 @@ public class Config implements IConfig, Serializable {
 	}
 
 	@Override
+	public void setMapSize(MapSize mapSize) {
+		this.mapSize = mapSize;
+	}
+
+	@Override
 	public void setPourcentageObstacle(float pourcentageObstacle) {
 		this.pourcentageObstacle = pourcentageObstacle;
 	}
@@ -106,13 +177,11 @@ public class Config implements IConfig, Serializable {
 		this.showFps = showFps;
 	}
 
-	@Override
-	public MapSize getMapSize() {
-		return mapSize;
+	public void setSoldatEnnemis(Soldat[] soldatEnnemis) {
+		this.soldatEnnemis = soldatEnnemis;
 	}
 
-	@Override
-	public void setMapSize(MapSize mapSize) {
-		this.mapSize = mapSize;
+	public void setSoldatJoueur(Soldat[] soldatJoueur) {
+		this.soldatJoueur = soldatJoueur;
 	}
 }

@@ -2,21 +2,25 @@ package wargame;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import wargame.assets.ImageAsset;
+import wargame.menu.MenuButton;
 import wargame.utils.WargameUtils;
 
-public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
+public class PanneauJeu extends JPanel implements ListenerAdapter {
 	private static final long serialVersionUID = -8883115886343935124L;
 	/**
 	 * Image de l'herbe
@@ -86,22 +90,31 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		g.drawLine(dx, dy, x, y);
 	}
 
-	private float zoom;
 	private int mouseX, mouseY;
 	private Point originDragPoint;
-	private float translateX, translateY;
-
 	private float originTranslateX, originTranslateY;
+	private float translateX, translateY;
+	private float zoom;
 
 	private Wargame carte;
 
-	public PanneauJeu(Wargame carte) {
-		this.carte = carte;
+	public PanneauJeu(Wargame jeu) {
+		this.carte = jeu;
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener(this);
-		addKeyListener(this);
 		setSize(800, 600);
+		JButton finTour = new MenuButton("Fin de tour");
+		finTour.setPreferredSize(new Dimension(200, 60));
+		finTour.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				jeu.jouerSoldats();
+				jeu.jouerIA();
+			}
+		});
+		add(finTour);
 	}
 
 	/**
@@ -125,22 +138,6 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		zoom = Math.max(carte.getLargeur(), carte.getHauteur()) / 5;
 	}
 
-	@Override
-	public void keyPressed(KeyEvent e) {
-		System.out.println(KeyEvent.VK_ESCAPE);
-		System.out.println(e.getKeyCode());
-		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			carte.getFrame().setContentPane(carte.getMenu());
-			carte.getFrame().pack();
-		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {}
-
-	@Override
-	public void keyTyped(KeyEvent e) {}
-
 	/**
 	 * Place la camera de jeu sur une position (x, y) (au centre)
 	 * 
@@ -157,7 +154,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 			translateY = -0.6666F * (y - (float) getHeight() / unit / 2);
 		}
 	}
-
+	
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if (originDragPoint != null) {
@@ -426,5 +423,15 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 
 		g.setFont(old);
 		g.translate(-translateX, -translateY);
+	}
+
+	public void onKey(int keyCode) {
+		if (keyCode == KeyEvent.VK_ESCAPE) {
+			carte.showMenu(carte.getMenuPause());
+		}
+	}
+
+	public void setZoom(float zoom) {
+		this.zoom = zoom;
 	}
 }

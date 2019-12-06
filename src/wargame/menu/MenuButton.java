@@ -20,6 +20,7 @@ public class MenuButton extends JButton implements MouseListener {
 	private static final Color HOVER = new Color(0x33ffffff, true);
 	private static final Color SELECTED = new Color(0x44ffffff, true);
 	private static final Color SELECTED_BORDER = new Color(SELECTED.getRGB());
+	private static final Color NOT_ENABLED = new Color(0x44999999, true);
 	private static final ImageAsset BUTTON_IMAGE = new ImageAsset("button.png");
 	private static final ImageAsset BUTTON_IMAGE_HOVER = new ImageAsset("button_hover.png");
 	public static final SoundAsset CLIQUE_BOUTON = new SoundAsset("Epee.wav");
@@ -81,6 +82,7 @@ public class MenuButton extends JButton implements MouseListener {
 
 	@Override
 	protected void paintComponent(Graphics g) {
+		Color text;
 		if (image != null) {
 			if (mouseIn) {
 				if (imageHover == null) {
@@ -89,27 +91,32 @@ public class MenuButton extends JButton implements MouseListener {
 					g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
 				} else
 					g.drawImage((imageHover).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
-				g.setColor(textHover);
+				text = textHover;
 			} else {
 				g.drawImage((image).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
-				g.setColor(text);
+				text = this.text;
 			}
 		} else {
-			g.setColor(text);
+			text = this.text;
 		}
+		if (!getText().isEmpty()) {
+			g.setColor(text);
+			Font old = getFont();
+			g.setFont(old.deriveFont((float) (getHeight() / 4)));
+			WargameUtils.drawCenter(g, getWidth() / 2, getHeight() / 2, getText());
+			g.setFont(old);
+		}
+		
 		if (used) {
 			g.setColor(SELECTED);
 			g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
 			g.setColor(SELECTED_BORDER);
 			g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
 		}
-		if (getText().isEmpty())
-			return;
-
-		Font old = getFont();
-		g.setFont(old.deriveFont((float) (getHeight() / 4)));
-		WargameUtils.drawCenter(g, getWidth() / 2, getHeight() / 2, getText());
-		g.setFont(old);
+		if (!isEnabled()) {
+			g.setColor(NOT_ENABLED);
+			g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+		}
 	}
 
 }

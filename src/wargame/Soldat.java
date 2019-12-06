@@ -6,6 +6,8 @@ import wargame.config.IConfig;
  * Soldat dans une case du plateau de jeu
  */
 public class Soldat extends Element implements ISoldat {
+	private static final long serialVersionUID = 4490497910854130663L;
+
 	public static boolean rechercheSequentielle(ICase[] tableau, Soldat element) {
 		for (ICase c : tableau) {
 			if (c != null && element.equals(c.getElement()))

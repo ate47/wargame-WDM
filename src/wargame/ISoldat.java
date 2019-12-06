@@ -1,8 +1,10 @@
 package wargame;
 
+import java.io.Serializable;
+
 import wargame.config.IConfig;
 
-public interface ISoldat {
+public interface ISoldat extends Serializable{
 	/**
 	 * Valeur de retour de {@link ISoldat#getProchainMouvement()}
 	 */
@@ -110,4 +112,9 @@ public interface ISoldat {
 	 * @param vie
 	 */
 	void setVie(int vie);
+
+	/**
+	 * Calcul le choix de l'IA
+	 */
+	void choixIA();
 }

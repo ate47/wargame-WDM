@@ -1,9 +1,11 @@
 package wargame;
 
+import java.io.Serializable;
+
 /**
  * Represente une case de la carte de jeu
  */
-public interface ICase {
+public interface ICase extends Serializable {
 
 	/**
 	 * Appelé quand l'utilisateur clique sur cette case

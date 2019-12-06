@@ -1,11 +1,14 @@
 package wargame;
 
+import java.io.Serializable;
+
 import wargame.assets.ImageAsset;
 
 /**
  * Element dans le plateau de jeu
  */
-public class Element {
+public class Element implements Serializable {
+	private static final long serialVersionUID = 2367195829376787992L;
 	private ImageAsset asset;
 	private ICase position;
 

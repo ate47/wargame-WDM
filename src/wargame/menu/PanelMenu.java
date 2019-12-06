@@ -3,6 +3,7 @@ package wargame.menu;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
@@ -21,7 +22,7 @@ import wargame.utils.WargameUtils;
 /**
  * Dessinateur de faux jeu
  */
-public class PanelMenu extends JPanel implements ListenerAdapter {
+public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 	private static final long serialVersionUID = -6212292517967101515L;
 	private static final Color SURCOUCHE = new Color(0x66000000, true);
 	private static double shiftX, shiftY;
@@ -33,13 +34,13 @@ public class PanelMenu extends JPanel implements ListenerAdapter {
 		shiftY = Math.sin(angle) * speed;
 	}
 
-	private Wargame game;
+	protected final Wargame jeu;
 	private JComponent[] components;
 	private int buttonCount;
 
 	public PanelMenu(Wargame game, int buttons) {
 		super(null);
-		this.game = game;
+		this.jeu = game;
 		this.components = new JComponent[buttons];
 		addComponentListener(this);
 		addMouseListener(this);
@@ -60,10 +61,21 @@ public class PanelMenu extends JPanel implements ListenerAdapter {
 		return getHeight() / 3;
 	}
 
-	protected void addButton(String text, ActionListener listener) {
+	protected JButton addButton(String text, Runnable listener) {
+		return addButton(text, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				listener.run();
+			}
+		});
+	}
+
+	protected JButton addButton(String text, ActionListener listener) {
 		JButton button = new MenuButton(text);
 		button.addActionListener(listener);
 		addComponent(button);
+		return button;
 	}
 
 	protected void addLabel(String text) {
@@ -82,7 +94,7 @@ public class PanelMenu extends JPanel implements ListenerAdapter {
 	}
 
 	public void paint(Graphics g, int width, int height) {
-		float partialSecond = game.getPartialTick();
+		float partialSecond = jeu.getPartialTick();
 		translateX += shiftX * partialSecond;
 		translateY += shiftY * partialSecond;
 		Shape oldClip = g.getClip();
@@ -144,15 +156,20 @@ public class PanelMenu extends JPanel implements ListenerAdapter {
 	}
 
 	@Override
-	public void componentMoved(ComponentEvent e) {
-	}
+	public void componentMoved(ComponentEvent e) {}
 
 	@Override
-	public void componentShown(ComponentEvent e) {
-	}
+	public void componentShown(ComponentEvent e) {}
 
 	@Override
-	public void componentHidden(ComponentEvent e) {
+	public void componentHidden(ComponentEvent e) {}
+
+	@Override
+	public void removeAll() {
+		buttonCount = 0;
+		super.removeAll();
 	}
+
+	public abstract void init();
 
 }

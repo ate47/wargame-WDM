@@ -1,13 +1,20 @@
 package wargame.config;
 
-public interface IConfig {
-	public MapSize getMapSize();
+import wargame.ICase;
+import wargame.Soldat;
+import wargame.Wargame.FinJeu;
 
-	public void setMapSize(MapSize mapSize);
+public interface IConfig {
 
 	IConfig clone();
 
+	ConfigCase[][] getCarte();
+
+	FinJeu getCourant();
+
 	Difficulty getDifficulty();
+
+	Faction getFactionEnnemi();
 
 	Faction getFactionJoueur();
 
@@ -15,9 +22,17 @@ public interface IConfig {
 
 	int getLargeurCarte();
 
+	MapSize getMapSize();
+
 	int getNombreObstacle();
 
 	float getPourcentageObstacle();
+
+	Soldat[] getSoldatEnnemis();
+
+	Soldat[] getSoldatJoueur();
+
+	int getVieparregen();
 
 	int getVieParRegen();
 
@@ -25,7 +40,13 @@ public interface IConfig {
 
 	boolean isShowingFPS();
 
+	void setCarte(ICase[][] carte);
+
+	void setCourant(FinJeu courant);
+
 	void setDifficulty(Difficulty d);
+
+	void setFactionEnnemi(Faction factionEnnemi);
 
 	void setFactionJoueur(Faction factionJoueur);
 
@@ -33,7 +54,13 @@ public interface IConfig {
 
 	void setLargeurCarte(int largeurCarte);
 
+	void setMapSize(MapSize mapSize);
+
 	void setPourcentageObstacle(float pourcentageObstacle);
 
 	void setShowFps(boolean showFps);
+
+	void setSoldatEnnemis(Soldat[] soldatEnnemis);
+
+	void setSoldatJoueur(Soldat[] soldatJoueur);
 }

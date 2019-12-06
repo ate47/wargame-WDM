@@ -12,41 +12,7 @@ public class MenuJeu extends PanelMenu {
 	private static final long serialVersionUID = 4058740506271457913L;
 
 	public MenuJeu(Wargame jeu) {
-		super(jeu, 4);
-		PanneauRestauration restauration = new PanneauRestauration(jeu);
-		
-		addButton("Nouvelle Partie", new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				jeu.getFrame().setContentPane(new MenuNouvellePartie(jeu));
-				jeu.getFrame().pack();
-			}
-		});
-		addButton("Sauvegarder la partie", new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				jeu.getFrame().setContentPane(new MenuFin(jeu, false));
-				jeu.getFrame().pack();
-			}
-		});
-		addButton("Charger une partie", new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				jeu.getFrame().setContentPane(restauration);
-				jeu.getFrame().pack();
-			}
-		});
-		addButton("Quitter le jeu", new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
-		});
+		super(jeu, 3);
 	}
 
 	@Override
@@ -57,6 +23,33 @@ public class MenuJeu extends PanelMenu {
 		int decalage = getHeight() / 50;
 		g.drawImage(LOGO.getImageFromTime(), (getWidth() - sizeX) / 2, getHeight() / 3 - (sizeY + decalage), sizeX,
 				sizeY, this);
+	}
+
+	@Override
+	public void init() {
+		PanneauRestauration restauration = new PanneauRestauration(jeu);
+
+		addButton("Nouvelle Partie", new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				jeu.showMenu(new MenuNouvellePartie(jeu));
+			}
+		});
+		addButton("Charger une partie", new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				jeu.showMenu(restauration);
+			}
+		});
+		addButton("Quitter le jeu", new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
 	}
 
 }

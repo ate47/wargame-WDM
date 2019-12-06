@@ -141,13 +141,6 @@ public interface ICarte {
 	 */
 	ISoldat trouveSoldat(Faction f);
 
-	/**
-	 * Trouve un héros choisi aléatoirement parmi les 8 positions adjacentes de pos
-	 * 
-	 * @param pos la position ou chercher
-	 * @return le héros trouvé
-	 */
-	ISoldat trouveSoldat(ICase pos, Faction f);
 
 	/**
 	 * alloue un tableau de case suffisament grand et appel la méthode {@link ICarte#visible(int, int, int, Case[])}

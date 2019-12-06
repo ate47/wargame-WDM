@@ -1,19 +1,19 @@
 package wargame;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Random;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -25,16 +25,20 @@ import wargame.assets.SoundAsset;
 import wargame.config.Config;
 import wargame.config.Faction;
 import wargame.config.IConfig;
-import wargame.menu.MenuButton;
+import wargame.config.SavedConfig;
 import wargame.menu.MenuFin;
 import wargame.menu.MenuJeu;
+import wargame.menu.MenuPause;
+import wargame.menu.PanelMenu;
+import wargame.utils.WargameUtils;
 
-public class Wargame implements ICarte {
+public class Wargame implements ICarte, KeyEventDispatcher {
 	public enum FinJeu {
 		GAGNE, PERDU, EN_COURS
 	}
 
-	public class Case implements ICase {
+	public static class Case implements ICase, Serializable {
+		private static final long serialVersionUID = 4868404777608031114L;
 		private boolean visible, visite, accessible;
 		private Element e;
 		private int x, y;
@@ -47,15 +51,15 @@ public class Wargame implements ICarte {
 		@Override
 		public void click() {
 			// Si on n'a toujours pas cliqué
-			if (soldat == null) {
+			if (instance.soldat == null) {
 				if (e != null && (e instanceof Soldat)) {
 					Soldat s = (Soldat) e;
-					if (s.getType().getFaction() == factionJoueur) {
+					if (s.getType().getFaction() == instance.config.getFactionJoueur()) {
 						if (s.aJoueCeTour())
 							s.annulerTour();
-						soldat = s;
-						visibles = visible(s.getType().getPorteeVisuelle());
-						for (Case v : visibles)
+						instance.soldat = s;
+						instance.visibles = visible(s.getType().getPorteeVisuelle());
+						for (Case v : instance.visibles)
 							if (v != null)
 								v.accessible = true;
 					}
@@ -71,47 +75,44 @@ public class Wargame implements ICarte {
 				if (e == null && accessible) {
 					// on autorise le deplacement ...
 					try {
-						soldat.seDeplace(this);
+						instance.soldat.seDeplace(this);
 					} catch (IllegalMoveException e1) {
 						// (par construction impossible)
 						e1.printStackTrace();
 					}
 					// ...et on retire les cases qu'on avait placé accessible
-					for (Case c : visibles)
+					for (Case c : instance.visibles)
 						if (c != null)
 							c.accessible = false;
 
-					soldat = null;
-					visibles = null;
+					instance.soldat = null;
+					instance.visibles = null;
 
 					// on reclique sur la même case
-				} else if (equals(soldat.getPosition())) {
-					for (Case c : visibles)
+				} else if (equals(instance.soldat.getPosition())) {
+					for (Case c : instance.visibles)
 						if (c != null)
 							c.accessible = false;
-					soldat = null;
-					visibles = null;
+					instance.soldat = null;
+					instance.visibles = null;
 
 					// on clique sur un soldat accessible
 				} else if (e != null && e instanceof Soldat && accessible) {
 					Soldat s = (Soldat) e;
-					if (s.getType().getFaction() == factionEnnemi) {
+					if (s.getType().getFaction() == instance.config.getFactionEnnemi()) {
 						try {
-							soldat.seBat(s);
+							instance.soldat.seBat(s);
 						} catch (IllegalMoveException e1) {
 							e1.printStackTrace();
 						}
-						for (Case c : visibles)
+						for (Case c : instance.visibles)
 							if (c != null)
 								c.accessible = false;
 
-						soldat = null;
+						instance.soldat = null;
 						s = null;
-						visibles = null;
+						instance.visibles = null;
 					}
-				} else {
-					System.err.println("Mauvais emplacement");
-					// TODO: afficher erreur
 				}
 			}
 		}
@@ -190,9 +191,13 @@ public class Wargame implements ICarte {
 
 		@Override
 		public Case[] visible(int portee) {
-			return Wargame.this.visible(getX(), getY(), portee);
+			return instance.visible(getX(), getY(), portee);
 		}
 	}
+
+	private void writeObject(ObjectOutputStream out) throws IOException {}
+
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {}
 
 	/**
 	 * Frame du jeu avec calcul temps entre frame
@@ -226,70 +231,48 @@ public class Wargame implements ICarte {
 	}
 
 	public static final Random RANDOM = new Random();
-
-	public static final File SAVE_FILE = new File("wargame.cfg");
+	public static final int MAX_SAVE = 4;
 	public static final SoundAsset MUSIQUE_JEU = new SoundAsset("ambiance.wav");
-
+	private static Wargame instance;
+	// AFFICHAGE
 	private long lastFPSTime = System.currentTimeMillis();
 	private float partialTick = 0F;
 	private float fps;
 
+	// MENU
+	private JFrame frame;
 	private PanneauJeu panneau;
-
 	private MenuJeu menu;
 	private MenuFin menuFin;
+	private MenuPause menuPause;
 
+	// CONFIGURATION DE JEU
 	private IConfig config;
-	private JFrame frame;
-	private int sx, sy;
-	private Soldat[] soldatJoueur;
-	private Soldat[] soldatEnnemis;
-	private Faction factionJoueur;
-	private Faction factionEnnemi;
-	private Case[][] carte;
-	private ICase hoveredCase;
+	private SavedConfig[] save;
+
+	// CALCUL
 	private Case[] visibles;
 	private Soldat soldat;
-	private JButton finTour;
+	private ICase hoveredCase;
+	private Case[][] carte;
 
 	public Wargame() {
+		instance = this;
 		frame = new GameFrame("Wargame");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationByPlatform(true);
 		frame.setSize(800, 600);
 
-		finTour = new MenuButton("Fin de tour");
-		finTour.setPreferredSize(new Dimension(200, 60));
-		finTour.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				jouerSoldats();
-				jouerIA();
-
-				switch (estfinie()) {
-				case PERDU:
-					menuFin = new MenuFin(Wargame.this, false);
-					showMenu(menuFin);
-					break;
-				case GAGNE:
-					menuFin = new MenuFin(Wargame.this, true);
-					showMenu(menuFin);
-					break;
-				default:
-					;
-				}
-			}
-		});
-
 		panneau = new PanneauJeu(this);
 		panneau.setPreferredSize(frame.getSize());
-		panneau.add(finTour);
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
 
 		menu = new MenuJeu(this);
 		menu.setPreferredSize(frame.getSize());
 
-		frame.setContentPane(menu);
+		menuPause = new MenuPause(this);
+
+		showMenu(menu);
 
 		frame.setIconImage(new ImageAsset("ico.png").getImages()[0]);
 	}
@@ -301,16 +284,6 @@ public class Wargame implements ICarte {
 		e.setPosition(c);
 	}
 
-	public FinJeu estfinie() {
-		if (this.tousMort(soldatJoueur))
-			return FinJeu.PERDU;
-
-		if (this.tousMort(soldatEnnemis))
-			return FinJeu.GAGNE;
-		
-		return FinJeu.EN_COURS;
-	}
-
 	@Override
 	public void genererCarte() {
 		int i, j, k, carre, xmin, ymin, xmax, ymax, nb;
@@ -318,15 +291,13 @@ public class Wargame implements ICarte {
 
 		// LECTURE DES CONFIGURATIONS
 
-		this.factionJoueur = config.getFactionJoueur();
-		factionEnnemi = factionJoueur.getOthers();
+		config.setCourant(FinJeu.EN_COURS);
 
-		this.sx = config.getLargeurCarte();
-		this.sy = config.getHauteurCarte();
-		this.carte = new Case[sx][sy];
-		for (i = 0; i < carte.length; i++)
-			for (j = 0; j < carte[i].length; j++)
-				carte[i][j] = this.new Case(i, j);
+		carte = new Case[config.getLargeurCarte()][config.getHauteurCarte()];
+		for (i = 0; i < config.getCarte().length; i++)
+			for (j = 0; j < config.getCarte()[i].length; j++)
+				carte[i][j] = new Case(i, j);
+		config.setCarte(carte);
 
 		// PRODUCTION DES OBSTACLES
 
@@ -365,22 +336,22 @@ public class Wargame implements ICarte {
 		}
 
 		// PRODUCTION DES SOLDATS
-		nb = (int) (factionJoueur.nombreGenere() * config.getMapSize().getFactor());
-		soldatJoueur = new Soldat[nb];
+		nb = (int) (config.getFactionJoueur().nombreGenere() * config.getMapSize().getFactor());
+		config.setSoldatJoueur(new Soldat[nb]);
 
 		for (i = 0; i < nb; i++)
 			trouvePositionVide(xmin, ymin, xmax, ymax)
-					.setElement(soldatJoueur[i] = new Soldat(factionJoueur.getRandomElement()));
+					.setElement(config.getSoldatJoueur()[i] = new Soldat(config.getFactionJoueur().getRandomElement()));
 
 		// On place la camera sur le milieu de notre zone
 		cameraX = (xmax + xmin) / 2;
 		cameraY = (ymax + ymin) / 2;
 
-		nb = (int) (factionEnnemi.nombreGenere() * config.getDifficulty().getMultiplicateurEnnemis()
+		nb = (int) (config.getFactionEnnemi().nombreGenere() * config.getDifficulty().getMultiplicateurEnnemis()
 				* config.getMapSize().getFactor());
 
 		// PRODUCTION DES AUTRES SOLDATS
-		soldatEnnemis = new Soldat[nb * config.getDifficulty().getAreaCount()];
+		config.setSoldatEnnemis(new Soldat[nb * config.getDifficulty().getAreaCount()]);
 		k = 0;
 
 		carre = (carre + 1 + RANDOM.nextInt(4 - config.getDifficulty().getAreaCount())) % 4;
@@ -418,8 +389,8 @@ public class Wargame implements ICarte {
 			carre = (carre + 1) % 4;
 
 			for (i = 0; i < nb; i++, k++)
-				trouvePositionVide(xmin, ymin, xmax, ymax)
-						.setElement(soldatEnnemis[k] = new Soldat(factionEnnemi.getRandomElement()));
+				trouvePositionVide(xmin, ymin, xmax, ymax).setElement(
+						config.getSoldatEnnemis()[k] = new Soldat(config.getFactionEnnemi().getRandomElement()));
 
 		}
 		// ON LANCE L'AFFICHAGE
@@ -433,7 +404,7 @@ public class Wargame implements ICarte {
 
 	@Override
 	public Case getCase(int posX, int posY) {
-		if (posX < 0 || posX >= carte.length || posY < 0 || posY >= carte[posX].length)
+		if (posX < 0 || posX >= config.getLargeurCarte() || posY < 0 || posY >= config.getHauteurCarte())
 			return null;
 		return carte[posX][posY];
 	}
@@ -460,14 +431,7 @@ public class Wargame implements ICarte {
 
 	@Override
 	public int getHauteur() {
-		return sy;
-	}
-
-	/*
-	 * 
-	 */
-	public MenuJeu getMenuJeu() {
-		return menu;
+		return config.getHauteurCarte();
 	}
 
 	/**
@@ -479,11 +443,23 @@ public class Wargame implements ICarte {
 
 	@Override
 	public int getLargeur() {
-		return sx;
+		return config.getLargeurCarte();
 	}
 
 	public MenuJeu getMenu() {
 		return menu;
+	}
+
+	public MenuFin getMenuFin() {
+		return menuFin;
+	}
+
+	public SavedConfig[] getSave() {
+		return save;
+	}
+
+	public MenuPause getMenuPause() {
+		return menuPause;
 	}
 
 	@Override
@@ -501,13 +477,20 @@ public class Wargame implements ICarte {
 	}
 
 	@Override
-	public ISoldat[] getSoldatEnnemis() {
-		return soldatEnnemis;
+	public Soldat[] getSoldatEnnemis() {
+		return config.getSoldatEnnemis();
 	}
 
 	@Override
 	public Soldat[] getSoldatJoueur() {
-		return soldatJoueur;
+		return config.getSoldatJoueur();
+	}
+
+	public File getConfigFile(int number) {
+		File wargame = new File("wargame");
+		if (!wargame.exists())
+			wargame.mkdirs();
+		return new File(wargame, "save" + number + ".cfg");
 	}
 
 	@Override
@@ -517,16 +500,24 @@ public class Wargame implements ICarte {
 
 	@Override
 	public void jouerSoldats() {
-		int i, j;
-		for (i = 0; i < carte.length; i++)
-			for (j = 0; j < carte[i].length; j++)
+		int i, j, nombreSoldat = 0;
+		for (i = 0; i < config.getCarte().length; i++)
+			for (j = 0; j < config.getCarte()[i].length; j++)
 				carte[i][j].setVisible(false);
 
 		// 0 le BrG
-		for (Soldat s : soldatJoueur)
+		for (ISoldat s : getSoldatJoueur()) {
 			s.joueTour(getConfig());
+			if (!s.estMort())
+				nombreSoldat++;
+		}
 
-		for (ISoldat s : soldatJoueur)
+		if (nombreSoldat == 0) {
+			config.setCourant(FinJeu.PERDU);
+			showMenu(menuPause);
+		}
+
+		for (ISoldat s : getSoldatJoueur())
 			if (!s.estMort())
 				for (Case c : visible(s.getPosition().getX(), s.getPosition().getY(), s.getType().getPorteeVisuelle()))
 					if (c != null) {
@@ -534,6 +525,10 @@ public class Wargame implements ICarte {
 						c.setVisite(true);
 					}
 		panneau.repaint();
+	}
+
+	public FinJeu getCourant() {
+		return config.getCourant();
 	}
 
 	public void lancerJeu() {
@@ -554,6 +549,24 @@ public class Wargame implements ICarte {
 	}
 
 	/**
+	 * Lance la configuration de jeu
+	 * 
+	 * @param cfg la config de jeu
+	 */
+	public void lancerConfig(IConfig cfg) {
+		config = cfg.clone();
+
+		// ON LANCE L'AFFICHAGE
+
+		panneau.init();
+		panneau.setZoom(1);
+		panneau.lookAt(config.getLargeurCarte() / 2, config.getHauteurCarte() / 2);
+
+		// CALCUL DU BROUILLARD DE GUERRE
+		jouerSoldats();
+	}
+
+	/**
 	 * Supprime un soldat du jeu (vérifier avant si ça vie < 0)
 	 * 
 	 * @param soldat le soldat en question
@@ -569,19 +582,44 @@ public class Wargame implements ICarte {
 	}
 
 	public void readConfig() {
-		if (SAVE_FILE.exists()) {
-			System.out.println("Lecture de " + SAVE_FILE.getAbsolutePath() + "... ");
-			try (FileInputStream in = new FileInputStream(SAVE_FILE)) {
-				ObjectInputStream ois = new ObjectInputStream(in);
-				config = (Config) ois.readObject();
-				return;
-			} catch (IOException | ClassNotFoundException e) {
-				if (JOptionPane.showConfirmDialog(null, "Voulez vous ecraser le fichier existant ?\n" + e.getMessage(),
-						"Erreur lors de la lecture du fichier", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
-					System.exit(0);
+		save = new SavedConfig[MAX_SAVE];
+		File cf;
+		for (int i = 0; i < MAX_SAVE; i++) {
+			save[i] = new SavedConfig();
+			cf = getConfigFile(i + 1);
+
+			if (cf.exists()) {
+				System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
+				Object o = WargameUtils.readObjectFromFile(cf);
+				if (o == null) {
+					if (JOptionPane.showConfirmDialog(null,
+							"Erreur lors de la lecture de " + cf.getAbsolutePath()
+									+ " Voulez vous ecraser le fichier existant ?",
+							"Erreur lors de la lecture du fichier", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
+						System.exit(0);
+				} else {
+					save[i] = (SavedConfig) o;
+				}
 			}
 		}
-		config = new Config();
+		cf = getConfigFile(0);
+
+		if (cf.exists()) {
+			System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
+			Object o = WargameUtils.readObjectFromFile(cf);
+			if (o == null) {
+				if (JOptionPane.showConfirmDialog(null,
+						"Erreur lors de la lecture de " + cf.getAbsolutePath()
+								+ " Voulez vous ecraser le fichier existant ?",
+						"Erreur lors de la lecture du fichier", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
+					System.exit(0);
+				else
+					config = new Config();
+			} else {
+				config = (IConfig) o;
+			}
+		} else
+			config = new Config();
 		writeConfig();
 	}
 
@@ -596,7 +634,13 @@ public class Wargame implements ICarte {
 
 	public void showMenu(JPanel panel) {
 		panel.setSize(frame.getRootPane().getSize());
+		if (panel instanceof PanelMenu) {
+			PanelMenu pnl = (PanelMenu) panel;
+			pnl.removeAll();
+			pnl.init();
+		}
 		frame.setContentPane(panel);
+		frame.repaint();
 	}
 
 	public boolean tousMort(Soldat lesSoldats[]) {
@@ -614,8 +658,8 @@ public class Wargame implements ICarte {
 		Case c;
 
 		while (true) {
-			x = (int) (Math.random() * sx);
-			y = (int) (Math.random() * sy);
+			x = (int) (Math.random() * getLargeur());
+			y = (int) (Math.random() * getHauteur());
 			c = getCase(x, y);
 			if (c.getElement() == null) {
 				return c;
@@ -624,9 +668,14 @@ public class Wargame implements ICarte {
 	}
 
 	@Override
-	public Case trouvePositionVide(ICase pos) {
-		// TODO Auto-generated method stub
-		return null;
+	public ICase trouvePositionVide(ICase pos) {
+		ICase[] autre = pos.visible(1);
+		ICase c;
+		while (true) {
+			c = autre[(int) (Math.random() * autre.length)];
+			if (c != null && c.getElement() == null)
+				return c;
+		}
 	}
 
 	/**
@@ -655,13 +704,11 @@ public class Wargame implements ICarte {
 
 	@Override
 	public ISoldat trouveSoldat(Faction f) {
-		return soldatJoueur[(int) (soldatJoueur.length * Math.random())];
-	}
-
-	@Override
-	public Soldat trouveSoldat(ICase pos, Faction f) {
-		// TODO Auto-generated method stub
-		return null;
+		while (true) {
+			ISoldat s = getSoldatJoueur()[(int) (getSoldatJoueur().length * Math.random())];
+			if (!s.estMort())
+				return s;
+		}
 	}
 
 	public Case[] visible(int x, int y, int portee) {
@@ -693,24 +740,41 @@ public class Wargame implements ICarte {
 	}
 
 	public void writeConfig() {
-		System.out.println("Ecriture de " + SAVE_FILE.getAbsolutePath() + "... ");
-		try (FileOutputStream out = new FileOutputStream(SAVE_FILE)) {
-			ObjectOutputStream oos = new ObjectOutputStream(out);
-			oos.writeObject(config);
-		} catch (IOException e) {
-			if (JOptionPane.showConfirmDialog(null, "Erreur lors de la sauvegarde, continuer ?\n" + e.getMessage(),
+		File cf;
+		config.setCarte(carte == null ? new Case[config.getLargeurCarte()][config.getHauteurCarte()] : carte);
+		cf = getConfigFile(0);
+		System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
+		if (!WargameUtils.saveObjectToFile(cf, config) && JOptionPane.showConfirmDialog(null,
+				"Erreur lors de la sauvegarde de " + cf.getAbsolutePath() + ", continuer ?",
+				"Impossible de sauvegarder le jeu", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
+			System.exit(0);
+		for (int i = 0; i < MAX_SAVE; i++) {
+			cf = getConfigFile(i + 1);
+			System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
+			if (!WargameUtils.saveObjectToFile(cf, save[i]) && JOptionPane.showConfirmDialog(null,
+					"Erreur lors de la sauvegarde de " + cf.getAbsolutePath() + ", continuer ?",
 					"Impossible de sauvegarder le jeu", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
 				System.exit(0);
 		}
 	}
 
-	private void jouerIA() {
-		for (Soldat s : soldatEnnemis)
+	public void jouerIA() {
+		int nombreIA = 0;
+		for (ISoldat s : getSoldatEnnemis())
 			s.choixIA();
 
-		for (Soldat s : soldatEnnemis) {
+		for (ISoldat s : getSoldatEnnemis()) {
 			s.joueTour(config);
+			if (!s.estMort())
+				nombreIA++;
 		}
+
+		if (nombreIA == 0) {
+			config.setCourant(FinJeu.GAGNE);
+
+			showMenu(getMenuFin());
+		}
+
 		panneau.repaint();
 	}
 
@@ -719,6 +783,13 @@ public class Wargame implements ICarte {
 		lastFPSTime = System.currentTimeMillis();
 		partialTick = (lastFPSTime - debFPSTime) / 1000F;
 		fps = (1 / partialTick);
+	}
+
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent e) {
+		if (frame.getContentPane() == panneau)
+			panneau.onKey(e.getKeyCode());
+		return false;
 	}
 
 }

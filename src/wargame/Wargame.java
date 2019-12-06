@@ -16,6 +16,7 @@ import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.Timer;
 
@@ -689,6 +690,11 @@ public class Wargame implements ICarte {
 			}
 		}
 		return true;
+	}
+	
+	public void showMenu(JPanel panel) {
+		panel.setSize(frame.getRootPane().getSize());
+		frame.setContentPane(panel);
 	}
 	
 	public int estfinie() {

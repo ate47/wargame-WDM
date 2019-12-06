@@ -16,11 +16,9 @@ public class PanneauRestauration extends PanelMenu {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				jeu.getFrame().setContentPane(jeu.getMenu());
-				jeu.getFrame().pack();
+				jeu.showMenu(jeu.getMenu());
 
 			}
 		});
-		setPreferredSize(jeu.getFrame().getSize());
 	}
 }

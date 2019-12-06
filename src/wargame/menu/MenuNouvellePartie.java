@@ -34,8 +34,7 @@ public class MenuNouvellePartie extends PanelMenu {
 			public void actionPerformed(ActionEvent e) {
 				jeu.writeConfig();
 				jeu.genererCarte();
-				jeu.getFrame().setContentPane(jeu.getPanneau());
-				jeu.getFrame().pack();
+				jeu.showMenu(jeu.getPanneau());
 			}
 		});
 
@@ -44,8 +43,7 @@ public class MenuNouvellePartie extends PanelMenu {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				jeu.setConfig(old);
-				jeu.getFrame().setContentPane(jeu.getMenu());
-				jeu.getFrame().pack();
+				jeu.showMenu(jeu.getMenu());
 			}
 		});
 

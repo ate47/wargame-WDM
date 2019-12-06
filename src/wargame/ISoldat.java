@@ -1,12 +1,35 @@
 package wargame;
 
-import wargame.ICarte.ICase;
 import wargame.config.IConfig;
 
 public interface ISoldat {
+	/**
+	 * Valeur de retour de {@link ISoldat#getProchainMouvement()}
+	 */
 	enum SoldatProchainMouvement {
-		COMBAT, DEPLACEMENT, RIEN
+		/**
+		 * Lors d'un combat
+		 */
+		COMBAT,
+		/**
+		 * Lors d'un deplacement
+		 */
+		DEPLACEMENT,
+		/**
+		 * Lors d'aucune action (ou regen si la vie n'est pas au maximum)
+		 */
+		RIEN
 	}
+
+	/**
+	 * @return si le soldat a déjà été deplacé ce tour
+	 */
+	boolean aJoueCeTour();
+
+	/**
+	 * annule la demande d'action du soldat
+	 */
+	void annulerTour();
 
 	/**
 	 * Attaque un autre soldat
@@ -16,9 +39,29 @@ public interface ISoldat {
 	void combat(ISoldat soldat);
 
 	/**
-	 * @return si le soldat a déjà été deplacé ce tour
+	 * @return si le soldat est mort ou vivant
 	 */
-	boolean aJoueCeTour();
+	boolean estMort();
+
+	/**
+	 * @return la cible lors d'une attaque
+	 */
+	Soldat getCible();
+
+	/**
+	 * @return le prochain emplacement pour un deplacement
+	 */
+	ICase getNextPosition();
+
+	/**
+	 * @return la position du soldat
+	 */
+	ICase getPosition();
+
+	/**
+	 * @return obtenir le prochain mouvement du soldat
+	 */
+	SoldatProchainMouvement getProchainMouvement();
 
 	/**
 	 * @return le type du soldat
@@ -26,14 +69,25 @@ public interface ISoldat {
 	IType getType();
 
 	/**
-	 * joue le tour du soldat
+	 * @return la vie du soldat
+	 */
+	int getVie();
+
+	/**
+	 * Joue le tour du soldat
+	 * 
+	 * @param cfg la configuration de jeu à suivre
 	 */
 	void joueTour(IConfig cfg);
 
 	/**
-	 * annule la demande d'action du soldat
+	 * Demande un combat de ce soldat avec une cible pour le prochain tour
+	 * 
+	 * @param enemi la cible
+	 * @throws IllegalMoveException
 	 */
-	void annulerTour();
+
+	void seBat(Soldat enemi) throws IllegalMoveException;
 
 	/**
 	 * demande un deplacement de ce soldat pour le prochain tour
@@ -42,36 +96,18 @@ public interface ISoldat {
 	 * @throws IllegalMoveException si la position n'est pas valide
 	 */
 	void seDeplace(ICase newPos) throws IllegalMoveException;
-	
+
 	/**
-	 * Demande un combat de ce soldat avec une cible pour le prochain tour 
-	 * @param enemi la cible
-	 * @throws IllegalMoveException 
-	 */
-	
-	void seBat(Soldat enemi)throws IllegalMoveException;
-	
-	/*
-	 * Demande que l'unité ce soigne pour le prochain tour
+	 * demande de se regen
+	 * 
 	 * @throws IllegalMoveException
 	 */
-	
 	void seRegen() throws IllegalMoveException;
-	
 
+	/**
+	 * definir la vie du soldat (sans verification des valeurs)
+	 * 
+	 * @param vie
+	 */
 	void setVie(int vie);
-
-
-	int getVie();
-
-
-	SoldatProchainMouvement getProchainMouvement();
-	
-	ICase getPosition();
-
-	ICase getNextPosition();
-	
-	Soldat getCible();
-	
-	boolean estMort();
 }

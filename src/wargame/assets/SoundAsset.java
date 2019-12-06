@@ -1,6 +1,5 @@
 package wargame.assets;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.sound.sampled.AudioFormat;
@@ -27,20 +26,26 @@ public class SoundAsset {
 	 */
 	public SoundAsset(String sound) {
 		try {
-			AudioInputStream audioStream = AudioSystem.getAudioInputStream(new File(sound));
+			AudioInputStream audioStream = AudioSystem.getAudioInputStream(SoundAsset.class.getResource("sound/"+sound));
 
 			AudioFormat format = audioStream.getFormat();
 
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
-
 			audioClip = (Clip) AudioSystem.getLine(info);
-
 			audioClip.open(audioStream);
 			audioStream.close();
-		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException | NullPointerException e) {
 			throw new IllegalArgumentException("Can't load sound : " + sound, e);
 		}
 	}
+
+	/**
+	 * boucler le son
+	 */
+	public void loop() {
+		audioClip.loop(Clip.LOOP_CONTINUOUSLY);
+	}
+
 	/**
 	 * joue le son
 	 */

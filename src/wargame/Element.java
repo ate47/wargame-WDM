@@ -1,13 +1,13 @@
 package wargame;
 
-import wargame.ICarte.ICase;
 import wargame.assets.ImageAsset;
 
+/**
+ * Element dans le plateau de jeu
+ */
 public class Element {
 	private ImageAsset asset;
 	private ICase position;
-
-
 
 	public Element(ImageAsset asset) {
 		this.asset = asset;
@@ -15,6 +15,7 @@ public class Element {
 
 	/**
 	 * definir la position de l'element
+	 * 
 	 * @param position la position
 	 */
 	public void setPosition(ICase position) {
@@ -27,7 +28,7 @@ public class Element {
 	public ICase getPosition() {
 		return position;
 	}
-	
+
 	/**
 	 * @return retourne l'image de la case
 	 */

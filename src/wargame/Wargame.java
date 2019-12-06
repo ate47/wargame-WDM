@@ -244,9 +244,9 @@ public class Wargame implements ICarte {
 	private Case[] visibles;
 	private Soldat soldat;
 	private JButton finTour;
-	private static final int PERDU = 1;
-	private static final int GAGNE = 2;
-	private static final int NON = 3;
+	public static final int PERDU = 1;
+	public static final int GAGNE = 2;
+	public static final int NON = 3;
 	
 	
 	public Wargame() {

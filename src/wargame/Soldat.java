@@ -150,7 +150,6 @@ public class Soldat extends Element implements ISoldat {
 		Element e;
 		boolean chercherpos = true;
 		ICase pos;
-		int test;
 
 		if (estMort())
 			return;
@@ -158,7 +157,7 @@ public class Soldat extends Element implements ISoldat {
 		// cases ciblables
 			vision = this.getPosition().visible(this.getType().getPorteeVisuelle());
 
-		// L'IA cherche un ennemis à taper dans sa vision
+		// L'IA cherche un ennemis ï¿½ taper dans sa vision
 		for (ICase c : vision) {
 			if (c != null) {
 				e = c.getElement();
@@ -189,7 +188,7 @@ public class Soldat extends Element implements ISoldat {
 		}
 
 		/*
-		 * Cherche une vide pour se déplacer
+		 * Cherche une vide pour se dï¿½placer
 		 */
 
 		while (chercherpos) {

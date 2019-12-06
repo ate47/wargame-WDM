@@ -510,7 +510,6 @@ public class Wargame implements ICarte {
 	}
 
 	private void jouerIA() {
-		int i;
 		for (Soldat s : soldatEnnemis)
 			s.choixIA();
 

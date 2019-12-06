@@ -13,22 +13,55 @@ import java.awt.event.MouseWheelEvent;
 
 import javax.swing.JPanel;
 
-import wargame.ICarte.ICase;
 import wargame.assets.ImageAsset;
 import wargame.utils.WargameUtils;
 
 public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 	private static final long serialVersionUID = -8883115886343935124L;
+	/**
+	 * Image de l'herbe
+	 */
 	public static final ImageAsset GRASS = new ImageAsset("grass0.png", "grass1.png", "grass2.png", "grass3.png");
+	/**
+	 * Image quand la souris est sur un hexagone
+	 */
 	public static final ImageAsset HOVER = new ImageAsset("hover.png");
+	/**
+	 * Image du brouillard de guerre
+	 */
 	public static final ImageAsset INVISIBLE = new ImageAsset("brouillard_guerre0.png");
+	/**
+	 * Image quand une zone est dans le brouillard de guerre visité
+	 */
 	public static final ImageAsset VISITE = new ImageAsset("visite.png");
+	/**
+	 * Image quand l'hexagone est hors de la carte
+	 */
 	public static final ImageAsset INVISIBLE_HL = new ImageAsset("dark_brouillard_guerre.png");
+	/**
+	 * Image quand un hexagone n'est pas accessible
+	 */
 	public static final ImageAsset INACCESSIBLE = new ImageAsset("inaccessible.png");
+	/**
+	 * Image de regeneration
+	 */
 	public static final ImageAsset OPT_REGEN = new ImageAsset("regen.png");
 
+	/**
+	 * Fond du jeu
+	 */
 	public static final Color BACKGROUND = new Color(0x505050);
 
+	/**
+	 * Dessine une fleche sur un {@link Graphics}
+	 * 
+	 * @param g      le graphique
+	 * @param ox     coord x de l'origine
+	 * @param oy     coord y de l'origine
+	 * @param dx     coord x de la destination
+	 * @param dy     coord y de la destination
+	 * @param taille taille des pointes
+	 */
 	public static void dessinerFleche(Graphics g, int ox, int oy, int dx, int dy, int taille) {
 		int x, y;
 		double norme, angle;
@@ -71,30 +104,25 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		setSize(800, 600);
 	}
 
-	public void init() {
-		zoom = Math.max(carte.getLargeur(), carte.getHauteur()) / 5;
-	}
-
+	/**
+	 * @return retourne la taille d'une unité de mesure
+	 */
 	public int getUnit() {
 		return (int) (Math.min(getWidth(), getHeight()) / getUnitViewCount());
 	}
 
+	/**
+	 * @return le nombre d'unité visible au maximum sur la frame
+	 */
 	public float getUnitViewCount() {
 		return Math.max(carte.getLargeur(), carte.getHauteur()) / zoom;
 	}
 
-	public boolean isInHexa(int x, int y, int w, int h) {
-		if (mouseX > x && mouseY > y && mouseX < x + w && mouseY < y + h) {
-			int rMouseY = mouseY - y;
-			if (rMouseY < w * 2 / 3)
-				if (rMouseY > w / 3)
-					return true;
-				else
-					rMouseY = w / 3 - rMouseY;
-			int rMouseX = Math.abs(mouseX - x - w / 2);
-			return rMouseY < -h * rMouseX / w + h;
-		}
-		return false;
+	/**
+	 * Initialise le panneau
+	 */
+	public void init() {
+		zoom = Math.max(carte.getLargeur(), carte.getHauteur()) / 5;
 	}
 
 	@Override
@@ -113,6 +141,12 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 	@Override
 	public void keyTyped(KeyEvent e) {}
 
+	/**
+	 * Place la camera de jeu sur une position (x, y) (au centre)
+	 * 
+	 * @param x coord x
+	 * @param y coord y
+	 */
 	public void lookAt(int x, int y) {
 		int unit = getUnit();
 		if (y % 2 == 0) {
@@ -150,6 +184,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		// Clique droit
 		if (e.getButton() == MouseEvent.BUTTON3) {
 			originTranslateX = translateX;
 			originTranslateY = translateY;
@@ -157,6 +192,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 			return;
 		}
 		originDragPoint = null;
+		// Clique gauche
 		if (e.getButton() == MouseEvent.BUTTON1) {
 			if (carte.getHoveredCase() != null)
 				carte.getHoveredCase().click();
@@ -173,21 +209,57 @@ public class PanneauJeu extends JPanel implements ListenerAdapter, KeyListener {
 		zoom(e.getX(), e.getY(), (float) -e.getPreciseWheelRotation());
 	}
 
+	/**
+	 * Zoom a partir d'une position de souris
+	 * 
+	 * @param mouseX posX de la souris à l'écran
+	 * @param mouseY posY de la souris à l'écran
+	 * @param factor facteur de zoom
+	 */
 	public void zoom(int mouseX, int mouseY, float factor) {
+		// on cherche le nouveau zoom
 		float newZoom = Math.max(zoom + factor / 10F, 1F);
+		// mouseX devient le centre de l'écran
 		float centerX = mouseX;
 		float centerY = mouseY;
 
+		// calcul du centre relatif
 		int unit = getUnit();
 		float centerOfZoomX = -this.translateX + centerX / unit;
 		float centerOfZoomY = -this.translateY + centerY / unit;
 
+		// on installe le nouveau zoom
 		zoom = newZoom;
+
+		// et on replace le centre relatif
 		int newUnit = getUnit();
 		this.translateX = -centerOfZoomX + centerX / newUnit;
 		this.translateY = -centerOfZoomY + centerY / newUnit;
 
 		repaint();
+	}
+
+	/**
+	 * Vrai si la souris est dans un hexagone de taille (x, y, w, h) faux sinon
+	 * 
+	 * @param x coord x
+	 * @param y coord y
+	 * @param w largeur
+	 * @param h hauteur
+	 * @return vrai si la souris est dans l'hexagone, faux sinon
+	 */
+	private boolean isInHexa(int x, int y, int w, int h) {
+		if (mouseX > x && mouseY > y && mouseX < x + w && mouseY < y + h) {
+			int rMouseY = mouseY - y;
+			if (rMouseY < w * 2 / 3)
+				if (rMouseY > w / 3)
+					return true;
+				else
+					rMouseY = w / 3 - rMouseY;
+			int rMouseX = Math.abs(mouseX - x - w / 2);
+			return rMouseY < -h * rMouseX / w + h;
+		}
+		return false;
 	}
 
 	@Override

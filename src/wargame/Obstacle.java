@@ -2,6 +2,9 @@ package wargame;
 
 import wargame.assets.ImageAsset;
 
+/**
+ * Obstacle dans une case du plateau de jeu
+ */
 public class Obstacle extends Element {
 
 	public enum TypeObstacle {

@@ -1,8 +1,10 @@
 package wargame;
 
-import wargame.ICarte.ICase;
 import wargame.config.IConfig;
 
+/**
+ * Soldat dans une case du plateau de jeu
+ */
 public class Soldat extends Element implements ISoldat {
 	public static boolean rechercheSequentielle(ICase[] tableau, Soldat element) {
 		for (ICase c : tableau) {
@@ -30,6 +32,7 @@ public class Soldat extends Element implements ISoldat {
 		return mouvement != SoldatProchainMouvement.RIEN;
 	}
 
+	@Override
 	public void annulerTour() {
 		mouvement = SoldatProchainMouvement.RIEN;
 	}
@@ -109,6 +112,9 @@ public class Soldat extends Element implements ISoldat {
 		mouvement = SoldatProchainMouvement.RIEN;
 	}
 
+	/**
+	 * Tue le soldat
+	 */
 	public void mort() {
 		this.getPosition().setElement(null);
 		setPosition(null);
@@ -145,6 +151,9 @@ public class Soldat extends Element implements ISoldat {
 			mort();
 	}
 
+	/**
+	 * Réalise le choix de l'IA
+	 */
 	public void choixIA() {
 		ICase[] vision;
 		Element e;

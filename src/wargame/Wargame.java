@@ -80,10 +80,6 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 							if (v != null)
 								v.accessible = true;
 					}
-				} else {
-					for (Case c : visible(4))
-						if (c != null)
-							c.setVisible(true);
 				}
 			} else {
 				// On a déjà cliqué
@@ -283,6 +279,8 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		menu.setPreferredSize(frame.getSize());
 
 		menuPause = new MenuPause(this);
+		
+		menuFin = new MenuFin(this);
 
 		showMenu(menu);
 
@@ -526,7 +524,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 		if (nombreSoldat == 0) {
 			config.setCourant(FinJeu.PERDU);
-			showMenu(menuPause);
+			showMenu(menuFin);
 		}
 
 		for (ISoldat s : getSoldatJoueur())
@@ -548,7 +546,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 		frame.pack();
 		frame.setVisible(true);
-		// MUSIQUE_JEU.loop();
+		MUSIQUE_JEU.loop();
 
 		/* sync des fps */
 		new Timer(1000 / 60, new ActionListener() {

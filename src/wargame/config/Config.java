@@ -1,6 +1,8 @@
 package wargame.config;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import wargame.ICase;
 import wargame.Soldat;
@@ -39,30 +41,23 @@ public class Config implements IConfig, Serializable {
 		this.mapSize = old.mapSize;
 		this.factionEnnemi = old.factionEnnemi;
 		this.courant = old.courant;
-		int i, nb = 0;
-		for (i = 0; i < old.soldatJoueur.length; i++)
-			if (old.soldatJoueur[i] != null && !old.soldatJoueur[i].estMort())
-				nb++;
-		this.soldatJoueur = new Soldat[nb];
-		nb = 0;
-		for (i = 0; i < old.soldatEnnemis.length; i++)
-			if (old.soldatEnnemis[i] != null && !old.soldatEnnemis[i].estMort())
-				nb++;
-		this.soldatEnnemis = new Soldat[nb];
-		int ij = 0, ie = 0;
+		this.carte = new ICase[old.carte.length][old.carte[0].length];
+		List<Soldat> joueur = new ArrayList<>();
+		List<Soldat> ennemis = new ArrayList<>();
+		int i, j;
 		ICase c;
 		Soldat s;
-		this.carte = new ICase[old.carte.length][old.carte[0].length];
-		int j;
 		for (i = 0; i < carte.length; i++)
 			for (j = 0; j < carte[i].length; j++) {
 				c = (carte[i][j] = (old.carte[i][j] == null ? null : old.carte[i][j].clone()));
-				if (c != null && c.getElement() instanceof Soldat)
+				if (c != null && c.getElement() instanceof Soldat && ((Soldat) c.getElement()).getVie() > 0)
 					if ((s = ((Soldat) c.getElement())).getType().getFaction() == factionJoueur)
-						soldatJoueur[ij++] = s;
+						joueur.add(s);
 					else
-						soldatEnnemis[ie++] = s;
+						ennemis.add(s);
 			}
+		this.soldatJoueur = joueur.stream().toArray(Soldat[]::new);
+		this.soldatEnnemis = ennemis.stream().toArray(Soldat[]::new);
 	}
 
 	@Override

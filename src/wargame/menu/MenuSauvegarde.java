@@ -32,9 +32,9 @@ public class MenuSauvegarde extends PanelMenu {
 	@Override
 	public void init() {
 		SavedConfig sc;
-		for (int i = 1; i <= Wargame.MAX_SAVE; i++) {
-			sc = jeu.getSave()[i - 1];
-			addButton("Sauvegarde " + i + (sc.isActive() ? " (Non vide)" : " (Vide)"), new SaveActionListener(i));
+		for (int i = 0; i < Wargame.MAX_SAVE; i++) {
+			sc = jeu.getSave()[i];
+			addButton("Sauvegarde " + (i + 1) + (sc.isActive() ? " (Non vide)" : " (Vide)"), new SaveActionListener(i));
 		}
 		addButton("Retour", new ActionListener() {
 

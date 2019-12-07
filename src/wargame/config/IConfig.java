@@ -8,7 +8,7 @@ public interface IConfig {
 
 	IConfig clone();
 
-	ConfigCase[][] getCarte();
+	ICase[][] getCarte();
 
 	FinJeu getCourant();
 

@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Array;
 
 /**
  * Méthodes utiles pour le jeu
@@ -44,26 +43,7 @@ public class WargameUtils {
 
 		return array[index % array.length];
 	}
-
-	private static Object arrayCloneSub0(Object array, int size, int dimension) {
-		Object[] t = (Object[]) Array.newInstance(array.getClass().getComponentType(), size);
-		Object[] sub = (Object[]) array;
-		if (dimension == 1) {
-			int i;
-			for (i = 0; i < t.length; i++)
-				t[i] = sub[i];
-		} else {
-			for (int i = 0; i < dimension; i++)
-				t[i] = arrayCloneSub0(sub[i], size, dimension - 1);
-		}
-		return t;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> T[] arrayCloneSub(T[] array, int size, int dimension) {
-		return array == null ? null : (T[]) arrayCloneSub0(array, size, dimension);
-	}
-
+	
 	public static Object readObjectFromFile(File file) {
 		try (FileInputStream in = new FileInputStream(file)) {
 			ObjectInputStream ois = new ObjectInputStream(in);

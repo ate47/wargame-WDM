@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Represente une case de la carte de jeu
  */
-public interface ICase extends Serializable {
+public interface ICase extends Serializable, Cloneable {
 
 	/**
 	 * Appelé quand l'utilisateur clique sur cette case
@@ -21,7 +21,8 @@ public interface ICase extends Serializable {
 	/**
 	 * cherche les cases visibles depuis cette position suivant une certaine portée
 	 * 
-	 * @param portee la portée
+	 * @param portee
+	 *            la portée
 	 * @return la teableau des positions visibles
 	 */
 	ICase[] visible(int portee);
@@ -57,7 +58,8 @@ public interface ICase extends Serializable {
 	/**
 	 * definir l'élement sur la case
 	 * 
-	 * @param e l'element a placer sur la case
+	 * @param e
+	 *            l'element a placer sur la case
 	 * @see ICarte.ICase#getElement()
 	 */
 	void setElement(Element e);
@@ -66,7 +68,8 @@ public interface ICase extends Serializable {
 	 * 
 	 * définir si la case est visible
 	 * 
-	 * @param visible vrai ou faux
+	 * @param visible
+	 *            vrai ou faux
 	 * @see ICase#isVisible()
 	 */
 	void setVisible(boolean visible);
@@ -74,8 +77,14 @@ public interface ICase extends Serializable {
 	/**
 	 * définir si la case est visitée
 	 * 
-	 * @param visite vrai ou faux
+	 * @param visite
+	 *            vrai ou faux
 	 * @see ICase#isVisite()
 	 */
 	void setVisite(boolean visite);
+
+	/**
+	 * @return un clone de la case
+	 */
+	ICase clone();
 }

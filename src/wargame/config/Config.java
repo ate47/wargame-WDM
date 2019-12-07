@@ -5,7 +5,6 @@ import java.io.Serializable;
 import wargame.ICase;
 import wargame.Soldat;
 import wargame.Wargame.FinJeu;
-import wargame.utils.WargameUtils;
 
 public class Config implements IConfig, Serializable {
 	private static final long serialVersionUID = 9194042623694545614L;
@@ -20,11 +19,15 @@ public class Config implements IConfig, Serializable {
 
 	private Faction factionEnnemi = Faction.VERT;
 	private FinJeu courant = FinJeu.EN_COURS;
-	private Soldat[] soldatJoueur = new Soldat[factionJoueur.nombreGenere()];
-	private Soldat[] soldatEnnemis = new Soldat[factionEnnemi.nombreGenere()];
-	private ConfigCase[][] carte = new ConfigCase[largeurCarte][hauteurCarte];
+	private Soldat[] soldatJoueur;
+	private Soldat[] soldatEnnemis;
+	private ICase[][] carte;
 
-	public Config() {}
+	public Config() {
+		soldatJoueur = new Soldat[factionJoueur.nombreGenere()];
+		soldatEnnemis = new Soldat[factionEnnemi.nombreGenere()];
+		carte = new ICase[largeurCarte][hauteurCarte];
+	}
 
 	private Config(Config old) {
 		this.showFps = old.showFps;
@@ -36,11 +39,30 @@ public class Config implements IConfig, Serializable {
 		this.mapSize = old.mapSize;
 		this.factionEnnemi = old.factionEnnemi;
 		this.courant = old.courant;
-		this.soldatJoueur = old.soldatJoueur == null ? null
-				: WargameUtils.arrayCloneSub(old.soldatJoueur, old.soldatJoueur.length, 1);
-		this.soldatEnnemis = old.soldatJoueur == null ? null
-				: WargameUtils.arrayCloneSub(old.soldatEnnemis, old.soldatEnnemis.length, 1);
-		this.carte = old.soldatJoueur == null ? null : WargameUtils.arrayCloneSub(old.carte, old.carte.length, 2);
+		int i, nb = 0;
+		for (i = 0; i < old.soldatJoueur.length; i++)
+			if (old.soldatJoueur[i] != null && !old.soldatJoueur[i].estMort())
+				nb++;
+		this.soldatJoueur = new Soldat[nb];
+		nb = 0;
+		for (i = 0; i < old.soldatEnnemis.length; i++)
+			if (old.soldatEnnemis[i] != null && !old.soldatEnnemis[i].estMort())
+				nb++;
+		this.soldatEnnemis = new Soldat[nb];
+		int ij = 0, ie = 0;
+		ICase c;
+		Soldat s;
+		this.carte = new ICase[old.carte.length][old.carte[0].length];
+		int j;
+		for (i = 0; i < carte.length; i++)
+			for (j = 0; j < carte[i].length; j++) {
+				c = (carte[i][j] = (old.carte[i][j] == null ? null : old.carte[i][j].clone()));
+				if (c != null && c.getElement() instanceof Soldat)
+					if ((s = ((Soldat) c.getElement())).getType().getFaction() == factionJoueur)
+						soldatJoueur[ij++] = s;
+					else
+						soldatEnnemis[ie++] = s;
+			}
 	}
 
 	@Override
@@ -49,7 +71,7 @@ public class Config implements IConfig, Serializable {
 	}
 
 	@Override
-	public ConfigCase[][] getCarte() {
+	public ICase[][] getCarte() {
 		return carte;
 	}
 
@@ -126,11 +148,7 @@ public class Config implements IConfig, Serializable {
 
 	@Override
 	public void setCarte(ICase[][] carte) {
-		this.carte = new ConfigCase[carte.length][carte[0].length];
-		int i, j;
-		for (i = 0; i < 0; i++)
-			for (j = 0; j < 0; j++)
-				this.carte[i][j] = new ConfigCase(carte[i][j]);
+		this.carte = carte;
 	}
 
 	public void setCourant(FinJeu courant) {

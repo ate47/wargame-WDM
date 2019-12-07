@@ -24,9 +24,17 @@ public class Soldat extends Element implements ISoldat {
 	private SoldatProchainMouvement mouvement = SoldatProchainMouvement.RIEN;
 
 	public Soldat(IType type) {
-		super(type.getImage());
+		super(type);
 		this.type = type;
 		vie = type.getPointsDeVie();
+	}
+
+	@Override
+	public String toString() {
+		return "Soldat [vie=" + vie + ", type=" + type + ", nextPosition="
+				+ (nextPosition != null ? nextPosition.getX() + ", " + nextPosition.getY() : "") + ", cible=" + cible
+				+ ", mouvement=" + mouvement + ", getPosition()=("
+				+ (getPosition() != null ? getPosition().getX() + ", " + getPosition().getY() : "") + ")]";
 	}
 
 	@Override
@@ -49,7 +57,7 @@ public class Soldat extends Element implements ISoldat {
 		des = (int) (Math.random() * this.getType().getPuissance());
 
 		soldat.setVie(Math.max(0, soldat.getVie() - des));
-		
+
 		// Riposte
 		if (!soldat.estMort()) {
 			des = 0;
@@ -59,7 +67,6 @@ public class Soldat extends Element implements ISoldat {
 				des = (int) (Math.random() * soldat.getType().getTir());
 			this.setVie(Math.max(0, this.getVie() - des));
 		}
-		
 
 	}
 
@@ -166,7 +173,7 @@ public class Soldat extends Element implements ISoldat {
 			return;
 
 		// cases ciblables
-			vision = this.getPosition().visible(this.getType().getPorteeVisuelle());
+		vision = this.getPosition().visible(this.getType().getPorteeVisuelle());
 
 		// L'IA cherche un ennemis � taper dans sa vision
 		for (ICase c : vision) {
@@ -204,7 +211,7 @@ public class Soldat extends Element implements ISoldat {
 
 		while (chercherpos) {
 			pos = vision[(int) (Math.random() * vision.length)];
-			if(pos != null && pos.getElement() == null) {
+			if (pos != null && pos.getElement() == null) {
 				try {
 					seDeplace(pos);
 					chercherpos = false;
@@ -213,6 +220,13 @@ public class Soldat extends Element implements ISoldat {
 				}
 			}
 		}
+	}
+
+	@Override
+	public Soldat clone() {
+		Soldat s = new Soldat(type);
+		s.vie = vie; // On ne recopie que la vie
+		return s;
 	}
 
 }

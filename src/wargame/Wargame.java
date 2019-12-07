@@ -8,9 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Random;
 
@@ -42,6 +39,26 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		private boolean visible, visite, accessible;
 		private Element e;
 		private int x, y;
+
+		@Override
+		public Case clone() {
+			return new Case(this);
+		}
+
+		private Case(Case old) {
+			visible = old.visible;
+			visite = old.visite;
+			accessible = old.accessible;
+			if (old.e != null) {
+				ICase oldPos = old.e.getPosition();
+				old.e.setPosition(null);
+				e = old.e.clone();
+				old.e.setPosition(oldPos);
+				e.setPosition(this);
+			}
+			x = old.x;
+			y = old.y;
+		}
 
 		public Case(int x, int y) {
 			this.x = x;
@@ -195,10 +212,6 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		}
 	}
 
-	private void writeObject(ObjectOutputStream out) throws IOException {}
-
-	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {}
-
 	/**
 	 * Frame du jeu avec calcul temps entre frame
 	 */
@@ -254,7 +267,6 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	private Case[] visibles;
 	private Soldat soldat;
 	private ICase hoveredCase;
-	private Case[][] carte;
 
 	public Wargame() {
 		instance = this;
@@ -279,7 +291,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 	@Override
 	public void ajouteElement(int x, int y, Element e) {
-		Case c = carte[x][y];
+		ICase c = config.getCarte()[x][y];
 		c.setElement(e);
 		e.setPosition(c);
 	}
@@ -293,11 +305,10 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 		config.setCourant(FinJeu.EN_COURS);
 
-		carte = new Case[config.getLargeurCarte()][config.getHauteurCarte()];
+		config.setCarte(new Case[config.getLargeurCarte()][config.getHauteurCarte()]);
 		for (i = 0; i < config.getCarte().length; i++)
 			for (j = 0; j < config.getCarte()[i].length; j++)
-				carte[i][j] = new Case(i, j);
-		config.setCarte(carte);
+				config.getCarte()[i][j] = new Case(i, j);
 
 		// PRODUCTION DES OBSTACLES
 
@@ -393,6 +404,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 						config.getSoldatEnnemis()[k] = new Soldat(config.getFactionEnnemi().getRandomElement()));
 
 		}
+
 		// ON LANCE L'AFFICHAGE
 
 		panneau.init();
@@ -403,10 +415,10 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	}
 
 	@Override
-	public Case getCase(int posX, int posY) {
+	public ICase getCase(int posX, int posY) {
 		if (posX < 0 || posX >= config.getLargeurCarte() || posY < 0 || posY >= config.getHauteurCarte())
 			return null;
-		return carte[posX][posY];
+		return config.getCarte()[posX][posY];
 	}
 
 	public IConfig getConfig() {
@@ -503,7 +515,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		int i, j, nombreSoldat = 0;
 		for (i = 0; i < config.getCarte().length; i++)
 			for (j = 0; j < config.getCarte()[i].length; j++)
-				carte[i][j].setVisible(false);
+				config.getCarte()[i][j].setVisible(false);
 
 		// 0 le BrG
 		for (ISoldat s : getSoldatJoueur()) {
@@ -536,7 +548,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 		frame.pack();
 		frame.setVisible(true);
-		MUSIQUE_JEU.loop();
+		// MUSIQUE_JEU.loop();
 
 		/* sync des fps */
 		new Timer(1000 / 60, new ActionListener() {
@@ -551,7 +563,8 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	/**
 	 * Lance la configuration de jeu
 	 * 
-	 * @param cfg la config de jeu
+	 * @param cfg
+	 *            la config de jeu
 	 */
 	public void lancerConfig(IConfig cfg) {
 		config = cfg.clone();
@@ -561,6 +574,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		panneau.init();
 		panneau.setZoom(1);
 		panneau.lookAt(config.getLargeurCarte() / 2, config.getHauteurCarte() / 2);
+		showMenu(panneau);
 
 		// CALCUL DU BROUILLARD DE GUERRE
 		jouerSoldats();
@@ -569,7 +583,8 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	/**
 	 * Supprime un soldat du jeu (vérifier avant si ça vie < 0)
 	 * 
-	 * @param soldat le soldat en question
+	 * @param soldat
+	 *            le soldat en question
 	 */
 	@Override
 	public void mort(Soldat soldat) {
@@ -589,7 +604,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 			cf = getConfigFile(i + 1);
 
 			if (cf.exists()) {
-				System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
+//				System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
 				Object o = WargameUtils.readObjectFromFile(cf);
 				if (o == null) {
 					if (JOptionPane.showConfirmDialog(null,
@@ -605,7 +620,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		cf = getConfigFile(0);
 
 		if (cf.exists()) {
-			System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
+//			System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
 			Object o = WargameUtils.readObjectFromFile(cf);
 			if (o == null) {
 				if (JOptionPane.showConfirmDialog(null,
@@ -621,10 +636,6 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		} else
 			config = new Config();
 		writeConfig();
-	}
-
-	public void setConfig(IConfig config) {
-		this.config = config;
 	}
 
 	@Override
@@ -653,9 +664,9 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	}
 
 	@Override
-	public Case trouvePositionVide() {
+	public ICase trouvePositionVide() {
 		int x, y;
-		Case c;
+		ICase c;
 
 		while (true) {
 			x = (int) (Math.random() * getLargeur());
@@ -681,15 +692,19 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	/**
 	 * trouve une position vide dans un rectangle(xmin, ymin, xmax, ymax)
 	 * 
-	 * @param xmin coord x du haut gauche du rectangle
-	 * @param ymin coord y du haut gauche du rectangle
-	 * @param xmax coord x du bas droit du rectangle
-	 * @param ymax coord y du bas droit du rectangle
+	 * @param xmin
+	 *            coord x du haut gauche du rectangle
+	 * @param ymin
+	 *            coord y du haut gauche du rectangle
+	 * @param xmax
+	 *            coord x du bas droit du rectangle
+	 * @param ymax
+	 *            coord y du bas droit du rectangle
 	 * @return
 	 */
-	public Case trouvePositionVide(int xmin, int ymin, int xmax, int ymax) {
+	public ICase trouvePositionVide(int xmin, int ymin, int xmax, int ymax) {
 		int x, y;
-		Case c;
+		ICase c;
 
 		while (true) {
 			x = (int) (Math.random() * (xmax - xmin)) + xmin;
@@ -741,16 +756,17 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 	public void writeConfig() {
 		File cf;
-		config.setCarte(carte == null ? new Case[config.getLargeurCarte()][config.getHauteurCarte()] : carte);
+//		config.setCarte(config.getCarte() == null ? new Case[config.getLargeurCarte()][config.getHauteurCarte()]
+//				: config.getCarte());
 		cf = getConfigFile(0);
-		System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
+//		System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
 		if (!WargameUtils.saveObjectToFile(cf, config) && JOptionPane.showConfirmDialog(null,
 				"Erreur lors de la sauvegarde de " + cf.getAbsolutePath() + ", continuer ?",
 				"Impossible de sauvegarder le jeu", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
 			System.exit(0);
 		for (int i = 0; i < MAX_SAVE; i++) {
 			cf = getConfigFile(i + 1);
-			System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
+//			System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
 			if (!WargameUtils.saveObjectToFile(cf, save[i]) && JOptionPane.showConfirmDialog(null,
 					"Erreur lors de la sauvegarde de " + cf.getAbsolutePath() + ", continuer ?",
 					"Impossible de sauvegarder le jeu", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
@@ -790,6 +806,10 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		if (frame.getContentPane() == panneau)
 			panneau.onKey(e.getKeyCode());
 		return false;
+	}
+
+	public void setConfig(IConfig cfg) {
+		this.config = cfg;
 	}
 
 }

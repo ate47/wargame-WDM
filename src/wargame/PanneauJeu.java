@@ -410,8 +410,20 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	}
 
 	public void onKey(int keyCode) {
-		if (keyCode == KeyEvent.VK_ESCAPE) {
+		switch (keyCode) {
+		case KeyEvent.VK_ESCAPE:
 			carte.showMenu(carte.getMenuPause());
+			break;
+		case KeyEvent.VK_UP:
+		case KeyEvent.VK_KP_UP:
+			zoom(mouseX, mouseY, +0.75F);
+			break;
+		case KeyEvent.VK_DOWN:
+		case KeyEvent.VK_KP_DOWN:
+			zoom(mouseX, mouseY, -0.75F);
+			break;
+		default:
+			break;
 		}
 	}
 

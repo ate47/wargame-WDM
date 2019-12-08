@@ -19,7 +19,6 @@ public interface ICase extends Serializable, Cloneable {
 
 	/**
 	 * @return l'élément sur la case
-	 * @see ICarte.ICase#setElement(Element)
 	 */
 	Element getElement();
 
@@ -64,7 +63,7 @@ public interface ICase extends Serializable, Cloneable {
 	 * definir si la case est accessible
 	 * 
 	 * @param accessible
-	 *            l'accessibilit�
+	 *            l'accessibilité
 	 */
 	void setAccessible(boolean accessible);
 
@@ -73,7 +72,6 @@ public interface ICase extends Serializable, Cloneable {
 	 * 
 	 * @param e
 	 *            l'element a placer sur la case
-	 * @see ICarte.ICase#getElement()
 	 */
 	void setElement(Element e);
 

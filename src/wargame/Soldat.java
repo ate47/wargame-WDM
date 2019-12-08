@@ -14,7 +14,7 @@ public class Soldat extends Element implements ISoldat {
 	 * @param tableau
 	 *            les cases
 	 * @param element
-	 *            le soldat à chercher
+	 *            le soldat Ã  chercher
 	 * @return vrai si il est dedans, faux sinon
 	 */
 	public static boolean rechercheSequentielle(ICase[] tableau, Soldat element) {
@@ -33,7 +33,7 @@ public class Soldat extends Element implements ISoldat {
 	private SoldatProchainMouvement mouvement = SoldatProchainMouvement.RIEN;
 
 	/**
-	 * Créer un soldat avec un type
+	 * CrÃ©er un soldat avec un type
 	 * 
 	 * @param type
 	 *            le type du soldat
@@ -178,7 +178,7 @@ public class Soldat extends Element implements ISoldat {
 	}
 
 	/**
-	 * Réalise le choix de l'IA
+	 * RÃ©alise le choix de l'IA
 	 */
 	public void choixIA() {
 		ICase[] vision;

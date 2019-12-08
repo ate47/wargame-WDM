@@ -105,7 +105,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	private Wargame carte;
 
 	/**
-	 * Créer un panneau de jeu
+	 * CrÃ©er un panneau de jeu
 	 * 
 	 * @param jeu
 	 *            le jeu
@@ -416,7 +416,7 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	}
 
 	/**
-	 * Quand une touche est cliqué et que le menu est visible
+	 * Quand une touche est cliquÃ© et que le menu est visible
 	 * 
 	 * @param keyCode
 	 *            la touche

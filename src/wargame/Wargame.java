@@ -59,12 +59,10 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		}
 
 		/**
-		 * Construit une case avec ces coordonnÈes
+		 * Construit une case avec ces coordonn√©es
 		 * 
-		 * @param x
-		 *            pos x
-		 * @param y
-		 *            pos y
+		 * @param x pos x
+		 * @param y pos y
 		 */
 		public Case(int x, int y) {
 			this.x = x;
@@ -73,14 +71,14 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 		@Override
 		public void click() {
-			// Si on n'a toujours pas cliquÈ
+			// Si on n'a toujours pas cliqu√©
 			if (instance.soldat == null) {
 				// La case courante est un soldat
 				if (e != null && (e instanceof Soldat)) {
 					Soldat s = (Soldat) e;
 					// de notre faction
 					if (s.getType().getFaction() == instance.config.getFactionJoueur()) {
-						// on annule son tour prÈcedent
+						// on annule son tour pr√©cedent
 						if (s.aJoueCeTour())
 							s.annulerTour();
 						// on le place comme soldat courant
@@ -98,7 +96,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 					}
 				}
 			} else {
-				// On a dÈj‡† cliquÈ
+				// On a d√©j√† cliqu√©
 
 				// la case est vide et accessible
 				if (e == null && accessible) {
@@ -117,7 +115,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 					instance.soldat = null;
 					instance.visibles = null;
 
-					// on reclique sur la mÍme case
+					// on reclique sur la m√™me case
 				} else if (equals(instance.soldat.getPosition())) {
 					for (Case c : instance.visibles)
 						if (c != null)
@@ -254,7 +252,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	 */
 	public enum FinJeu {
 		/**
-		 * On a gagnÈ
+		 * On a gagn√©
 		 */
 		GAGNE,
 		/**
@@ -262,7 +260,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		 */
 		PERDU,
 		/**
-		 * On est toujours l‡
+		 * On est toujours l√†
 		 */
 		EN_COURS
 	}
@@ -501,8 +499,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	/**
 	 * Trouve un fichier pour un num de configuration
 	 * 
-	 * @param number
-	 *            le numero de la sauvegarde
+	 * @param number le numero de la sauvegarde
 	 * @return le fichier de sauvegarde
 	 */
 	private File getConfigFile(int number) {
@@ -513,7 +510,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	}
 
 	/**
-	 * @return l'Ètat du jeu
+	 * @return l'√©tat du jeu
 	 */
 	public FinJeu getCourant() {
 		return config.getCourant();
@@ -695,8 +692,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	/**
 	 * Lance la configuration de jeu
 	 * 
-	 * @param cfg
-	 *            la config de jeu
+	 * @param cfg la config de jeu
 	 */
 	public void lancerConfig(IConfig cfg) {
 		config = cfg.clone();
@@ -735,8 +731,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	/**
 	 * Supprime un soldat du jeu (v√©rifier avant si √ßa vie < 0)
 	 * 
-	 * @param soldat
-	 *            le soldat en question
+	 * @param soldat le soldat en question
 	 */
 	@Override
 	public void mort(Soldat soldat) {
@@ -796,8 +791,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	/**
 	 * definir la config courante sans copie
 	 * 
-	 * @param cfg
-	 *            la configuration ‡ placer
+	 * @param cfg la configuration √† placer
 	 */
 	public void setConfig(IConfig cfg) {
 		this.config = cfg;
@@ -811,8 +805,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	/**
 	 * Affiche un panel
 	 * 
-	 * @param panel
-	 *            le panel
+	 * @param panel le panel
 	 */
 	public void showMenu(JPanel panel) {
 		panel.setSize(frame.getRootPane().getSize());
@@ -884,15 +877,11 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	/**
 	 * trouve une position vide dans un rectangle(xmin, ymin, xmax, ymax)
 	 * 
-	 * @param xmin
-	 *            coord x du haut gauche du rectangle
-	 * @param ymin
-	 *            coord y du haut gauche du rectangle
-	 * @param xmax
-	 *            coord x du bas droit du rectangle
-	 * @param ymax
-	 *            coord y du bas droit du rectangle
-	 * @return
+	 * @param xmin coord x du haut gauche du rectangle
+	 * @param ymin coord y du haut gauche du rectangle
+	 * @param xmax coord x du bas droit du rectangle
+	 * @param ymax coord y du bas droit du rectangle
+	 * @return une position vide
 	 */
 	public ICase trouvePositionVide(int xmin, int ymin, int xmax, int ymax) {
 		int x, y;

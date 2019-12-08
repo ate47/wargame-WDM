@@ -46,9 +46,9 @@ public class SelectionButtonsPanel<T extends IIconObject> extends JPanel impleme
 	 * Construit un selecteur
 	 * 
 	 * @param array
-	 *            le tableau des elements a sauvegardé
+	 *            le tableau des elements a sauvegardÃ©
 	 * @param name
-	 *            le nom a affiché
+	 *            le nom a affichÃ©
 	 * @param setter
 	 *            comment definir l'element
 	 * @param getter

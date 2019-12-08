@@ -21,7 +21,7 @@ public class ConfigCase implements Cloneable {
 	 * Convertir une case en case de configuration
 	 * 
 	 * @param c
-	 *            la case à convertir
+	 *            la case Ã  convertir
 	 */
 	public ConfigCase(ICase c) {
 		element = c.getElement();
@@ -30,7 +30,7 @@ public class ConfigCase implements Cloneable {
 	}
 
 	/**
-	 * @return une nouvelle case sans copie de l'élement
+	 * @return une nouvelle case sans copie de l'Ã©lement
 	 */
 	public Case toCase() {
 		Case c = new Case(x, y);

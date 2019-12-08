@@ -13,7 +13,7 @@ import wargame.assets.SoundAsset;
 import wargame.utils.WargameUtils;
 
 /**
- * Répresente un bouton dans le menu
+ * Represente un bouton dans le menu
  */
 public class MenuButton extends JButton implements MouseListener {
 
@@ -42,7 +42,7 @@ public class MenuButton extends JButton implements MouseListener {
 	 * @param image
 	 *            l'image de fond (ou null si aucune)
 	 * @param imageHover
-	 *            l'image de fond quand la souris est dessus (ou null même que sans
+	 *            l'image de fond quand la souris est dessus (ou null mÃªme que sans
 	 *            souris)
 	 * @param text
 	 *            la couleur du texte
@@ -67,7 +67,7 @@ public class MenuButton extends JButton implements MouseListener {
 	 * @param image
 	 *            l'image de fond (ou null si aucune)
 	 * @param imageHover
-	 *            l'image de fond quand la souris est dessus (ou null même que sans
+	 *            l'image de fond quand la souris est dessus (ou null mÃªme que sans
 	 *            souris)
 	 */
 	public MenuButton(String texte, ImageAsset image, ImageAsset imageHover) {
@@ -112,7 +112,7 @@ public class MenuButton extends JButton implements MouseListener {
 	}
 
 	/**
-	 * définir si on utilise ce bouton
+	 * dÃ©finir si on utilise ce bouton
 	 * 
 	 * @param b
 	 *            si on utilise ce bouton

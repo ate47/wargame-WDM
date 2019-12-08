@@ -14,7 +14,7 @@ public abstract class Element implements Serializable, Cloneable {
 	private ICase position;
 
 	/**
-	 * Element représenté par une image
+	 * Element reprÃ©sentÃ© par une image
 	 * 
 	 * @param asset
 	 *            l'image de l'objet

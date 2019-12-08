@@ -13,14 +13,14 @@ public class SavedConfig implements Serializable {
 	}
 
 	/**
-	 * @return si une configuration est présente dedans
+	 * @return si une configuration est prÃ©sente dedans
 	 */
 	public boolean isActive() {
 		return config != null;
 	}
 
 	/**
-	 * définir la configuration sauvegardé
+	 * dÃ©finir la configuration sauvegardÃ©
 	 * 
 	 * @param config
 	 *            la sauvegarde

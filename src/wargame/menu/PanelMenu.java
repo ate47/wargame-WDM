@@ -20,7 +20,7 @@ import wargame.config.Faction;
 import wargame.utils.WargameUtils;
 
 /**
- * Dessinateur de faux jeu, les composants doivent être ajouté dans la méthode
+ * Dessinateur de faux jeu, les composants doivent etre ajoutÃ© dans la mÃ©thode
  * {@link #init()}
  */
 public abstract class PanelMenu extends JPanel implements ListenerAdapter {
@@ -132,7 +132,7 @@ public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 	 * dessine le menu
 	 * 
 	 * @param g
-	 *            où
+	 *            oÃ¹
 	 * @param width
 	 *            largeur
 	 * @param height

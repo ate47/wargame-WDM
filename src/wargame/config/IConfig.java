@@ -20,12 +20,12 @@ public interface IConfig {
 	ICase[][] getCarte();
 
 	/**
-	 * @return l'état courant
+	 * @return l'Ã©tat courant
 	 */
 	FinJeu getCourant();
 
 	/**
-	 * @return la difficulté courante
+	 * @return la difficultÃ© courante
 	 */
 	Difficulty getDifficulty();
 
@@ -35,7 +35,7 @@ public interface IConfig {
 	Faction getFactionEnnemi();
 
 	/**
-	 * @return la faction allié
+	 * @return la faction alliÃ©e
 	 */
 	Faction getFactionJoueur();
 
@@ -93,18 +93,18 @@ public interface IConfig {
 	void setCarte(ICase[][] carte);
 
 	/**
-	 * definir l'état de jeu
+	 * definir l'Ã©tat de jeu
 	 * 
 	 * @param courant
-	 *            l'état de jeu
+	 *            l'Ã©tat de jeu
 	 */
 	void setCourant(FinJeu courant);
 
 	/**
-	 * definir la difficulté
+	 * definir la difficultÃ©
 	 * 
 	 * @param d
-	 *            la difficulté
+	 *            la difficultÃ©
 	 */
 	void setDifficulty(Difficulty d);
 
@@ -125,7 +125,7 @@ public interface IConfig {
 	void setFactionJoueur(Faction factionJoueur);
 
 	/**
-	 * définir la hauteur de la carte
+	 * dÃ©finir la hauteur de la carte
 	 * 
 	 * @param hauteurCarte
 	 *            la hauteur de la carte
@@ -133,7 +133,7 @@ public interface IConfig {
 	void setHauteurCarte(int hauteurCarte);
 
 	/**
-	 * définir la largeur de la carte
+	 * dÃ©finir la largeur de la carte
 	 * 
 	 * @param largeurCarte
 	 *            la largeur de la carte
@@ -141,7 +141,7 @@ public interface IConfig {
 	void setLargeurCarte(int largeurCarte);
 
 	/**
-	 * définir la taille de la carte
+	 * dÃ©finir la taille de la carte
 	 * 
 	 * @param mapSize
 	 *            la taille de la carte
@@ -149,7 +149,7 @@ public interface IConfig {
 	void setMapSize(MapSize mapSize);
 
 	/**
-	 * définir le pourcentage d'obstacle
+	 * dÃ©finir le pourcentage d'obstacle
 	 * 
 	 * @param pourcentageObstacle
 	 *            le pourcentage d'obstacle
@@ -157,7 +157,7 @@ public interface IConfig {
 	void setPourcentageObstacle(float pourcentageObstacle);
 
 	/**
-	 * définir si on affiche les fps
+	 * dÃ©finir si on affiche les fps
 	 * 
 	 * @param showFps
 	 *            si on affiche les fps
@@ -165,7 +165,7 @@ public interface IConfig {
 	void setShowFps(boolean showFps);
 
 	/**
-	 * définir les soldats ennemis
+	 * dÃ©finir les soldats ennemis
 	 * 
 	 * @param soldatEnnemis
 	 *            les soldats ennemis
@@ -173,9 +173,9 @@ public interface IConfig {
 	void setSoldatEnnemis(Soldat[] soldatEnnemis);
 
 	/**
-	 * définir les soldats joueurs
+	 * dÃ©finir les soldats joueurs
 	 * 
-	 * @param soldatEnnemis
+	 * @param soldatJoueur
 	 *            les soldats joueurs
 	 */
 	void setSoldatJoueur(Soldat[] soldatJoueur);

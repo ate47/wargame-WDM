@@ -19,7 +19,7 @@ public class Obstacle extends Element {
 		 */
 		ROCHER(new ImageAsset("rock0.png")),
 		/**
-		 * Forêt
+		 * ForÃªt
 		 */
 		FORET(new ImageAsset("foret.png")),
 		/**

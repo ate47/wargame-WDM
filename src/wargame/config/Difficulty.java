@@ -4,7 +4,7 @@ import wargame.assets.IIconObject;
 import wargame.assets.ImageAsset;
 
 /**
- * Represente une difficulté de jeu
+ * Represente une difficultÃ© de jeu
  */
 public enum Difficulty implements IIconObject {
 
@@ -43,7 +43,7 @@ public enum Difficulty implements IIconObject {
 	}
 
 	/**
-	 * @return le nom de la difficulté
+	 * @return le nom de la difficultÃ©
 	 */
 	public String getName() {
 		return name;

@@ -13,19 +13,19 @@ public interface ICase extends Serializable, Cloneable {
 	void click();
 
 	/**
+	 * @return un clone de la case
+	 */
+	ICase clone();
+
+	/**
 	 * @return l'élément sur la case
 	 * @see ICarte.ICase#setElement(Element)
 	 */
 	Element getElement();
 
-	/**
-	 * cherche les cases visibles depuis cette position suivant une certaine portée
-	 * 
-	 * @param portee
-	 *            la portée
-	 * @return la teableau des positions visibles
-	 */
-	ICase[] visible(int portee);
+	int getRelativeX(int unit);
+
+	int getRelativeY(int unit);
 
 	/**
 	 * @return la position x de la case
@@ -41,6 +41,11 @@ public interface ICase extends Serializable, Cloneable {
 	 * @return si la case est accessible
 	 */
 	boolean isAccessible();
+
+	/**
+	 * @return si on peut attaquer cette case
+	 */
+	boolean isTirable();
 
 	/**
 	 * 
@@ -65,6 +70,14 @@ public interface ICase extends Serializable, Cloneable {
 	void setElement(Element e);
 
 	/**
+	 * definir si on peut attaquer cette case
+	 * 
+	 * @param tirable
+	 *            si la case est attaquable
+	 */
+	void setTirable(boolean tirable);
+
+	/**
 	 * 
 	 * définir si la case est visible
 	 * 
@@ -84,7 +97,13 @@ public interface ICase extends Serializable, Cloneable {
 	void setVisite(boolean visite);
 
 	/**
-	 * @return un clone de la case
+	 * cherche les cases visibles depuis cette position suivant une certaine portée
+	 * 
+	 * @param portee
+	 *            la portée
+	 * @param colision
+	 *            si on calcul les colisions
+	 * @return la teableau des positions visibles
 	 */
-	ICase clone();
+	ICase[] visible(int portee, boolean colision);
 }

@@ -36,7 +36,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 	public static class Case implements ICase, Serializable {
 		private static final long serialVersionUID = 4868404777608031114L;
-		private boolean visible, visite, accessible;
+		private boolean visible, visite, accessible, tirable;
 		private Element e;
 		private int x, y;
 
@@ -49,6 +49,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 			visible = old.visible;
 			visite = old.visite;
 			accessible = old.accessible;
+			tirable = old.tirable;
 			if (old.e != null) {
 				ICase oldPos = old.e.getPosition();
 				old.e.setPosition(null);
@@ -67,22 +68,32 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 		@Override
 		public void click() {
-			// Si on n'a toujours pas cliquÃ©
+			// Si on n'a toujours pas cliqué
 			if (instance.soldat == null) {
+				// La case courante est un soldat
 				if (e != null && (e instanceof Soldat)) {
 					Soldat s = (Soldat) e;
+					// de notre faction
 					if (s.getType().getFaction() == instance.config.getFactionJoueur()) {
+						// on annule son tour précedent
 						if (s.aJoueCeTour())
 							s.annulerTour();
+						// on le place comme soldat courant
 						instance.soldat = s;
-						instance.visibles = visible(s.getType().getPorteeVisuelle());
-						for (Case v : instance.visibles)
+
+						for (Case v : visible(1, true))
 							if (v != null)
 								v.accessible = true;
+						instance.visibles = visible(s.getType().getTir() == 0 ? 1 : s.getType().getPorteeVisuelle(),
+								true); // les nouvelles cases
+						// tirables
+						for (Case v : instance.visibles)
+							if (v != null)
+								v.tirable = true;
 					}
 				}
 			} else {
-				// On a dÃ©jÃ  cliquÃ©
+				// On a déjà  cliqué
 
 				// la case est vide et accessible
 				if (e == null && accessible) {
@@ -96,21 +107,21 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 					// ...et on retire les cases qu'on avait placÃ© accessible
 					for (Case c : instance.visibles)
 						if (c != null)
-							c.accessible = false;
+							c.accessible = c.tirable = false;
 
 					instance.soldat = null;
 					instance.visibles = null;
 
-					// on reclique sur la mÃªme case
+					// on reclique sur la même case
 				} else if (equals(instance.soldat.getPosition())) {
 					for (Case c : instance.visibles)
 						if (c != null)
-							c.accessible = false;
+							c.accessible = c.tirable = false;
 					instance.soldat = null;
 					instance.visibles = null;
 
 					// on clique sur un soldat accessible
-				} else if (e != null && e instanceof Soldat && accessible) {
+				} else if (e != null && e instanceof Soldat && tirable) {
 					Soldat s = (Soldat) e;
 					if (s.getType().getFaction() == instance.config.getFactionEnnemi()) {
 						try {
@@ -120,10 +131,9 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 						}
 						for (Case c : instance.visibles)
 							if (c != null)
-								c.accessible = false;
+								c.accessible = c.tirable = false;
 
 						instance.soldat = null;
-						s = null;
 						instance.visibles = null;
 					}
 				}
@@ -149,6 +159,16 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		@Override
 		public Element getElement() {
 			return e;
+		}
+
+		@Override
+		public int getRelativeX(int unit) {
+			return y % 2 == 0 ? x * unit : (int) ((0.5000F + x) * unit);
+		}
+
+		@Override
+		public int getRelativeY(int unit) {
+			return (int) ((0.6666F * y) * unit);
 		}
 
 		@Override
@@ -199,12 +219,22 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 		@Override
 		public String toString() {
-			return "Case [visible=" + visible + ", visite=" + visite + ", e=" + e + "]";
+			return "Case [x=" + x + ", y=" + y + ", visible=" + visible + ", visite=" + visite + ", e=" + e + "]";
 		}
 
 		@Override
-		public Case[] visible(int portee) {
-			return instance.visible(getX(), getY(), portee);
+		public Case[] visible(int portee, boolean colision) {
+			return instance.visible(getX(), getY(), portee, colision);
+		}
+
+		@Override
+		public boolean isTirable() {
+			return tirable;
+		}
+
+		@Override
+		public void setTirable(boolean tirable) {
+			this.tirable = tirable;
 		}
 	}
 
@@ -279,7 +309,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		menu.setPreferredSize(frame.getSize());
 
 		menuPause = new MenuPause(this);
-		
+
 		menuFin = new MenuFin(this);
 
 		showMenu(menu);
@@ -529,7 +559,8 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 		for (ISoldat s : getSoldatJoueur())
 			if (!s.estMort())
-				for (Case c : visible(s.getPosition().getX(), s.getPosition().getY(), s.getType().getPorteeVisuelle()))
+				for (Case c : visible(s.getPosition().getX(), s.getPosition().getY(), s.getType().getPorteeVisuelle(),
+						false))
 					if (c != null) {
 						c.setVisible(true);
 						c.setVisite(true);
@@ -602,7 +633,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 			cf = getConfigFile(i + 1);
 
 			if (cf.exists()) {
-//				System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
+				// System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
 				Object o = WargameUtils.readObjectFromFile(cf);
 				if (o == null) {
 					if (JOptionPane.showConfirmDialog(null,
@@ -618,7 +649,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		cf = getConfigFile(0);
 
 		if (cf.exists()) {
-//			System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
+			// System.out.println("Lecture de " + cf.getAbsolutePath() + "... ");
 			Object o = WargameUtils.readObjectFromFile(cf);
 			if (o == null) {
 				if (JOptionPane.showConfirmDialog(null,
@@ -678,7 +709,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 	@Override
 	public ICase trouvePositionVide(ICase pos) {
-		ICase[] autre = pos.visible(1);
+		ICase[] autre = pos.visible(1, false);
 		ICase c;
 		while (true) {
 			c = autre[(int) (Math.random() * autre.length)];
@@ -724,13 +755,32 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		}
 	}
 
-	public Case[] visible(int x, int y, int portee) {
+	public Case[] visible(int x, int y, int portee, boolean colision) {
 		Case[] cases = new Case[nombreVisible(portee)];
-		return (Case[]) visible(x, y, portee, cases);
+		return (Case[]) visible(x, y, portee, colision, cases);
 	}
 
 	@Override
-	public ICase[] visible(int x, int y, int portee, ICase[] cases) {
+	public boolean traverseValide(ICase pos1, ICase pos2) {
+		int unit = 80;
+		int vectAX = pos1.getRelativeX(unit) + unit / 2, vectAY = pos1.getRelativeY(unit) + unit / 2;
+		int vectBX = pos2.getRelativeX(unit) + unit / 2, vectBY = pos2.getRelativeY(unit) + unit / 2;
+		double granul = 10 * Math.sqrt((vectAX - vectBX) * (vectAX - vectBX) + (vectAY - vectBY) * (vectAY - vectBY)),
+				k;
+
+		int vectXX, vectXY;
+		ICase c;
+		for (k = 0; k < granul; k++) {
+			vectXX = (int) ((1 - k / granul) * vectAX + k / granul * vectBX);
+			vectXY = (int) ((1 - k / granul) * vectAY + k / granul * vectBY);
+			if ((c = getRelativeCase(vectXX, vectXY, unit)) != null && c != pos1 && c != pos2 && c.getElement() != null)
+				return false;
+		}
+		return true;
+	}
+
+	@Override
+	public ICase[] visible(int x, int y, int portee, boolean colision, ICase[] cases) {
 		int i, j, k, l = 0, decalage;
 		decalage = 2 * ((y + portee + 1) % 2) - 1;
 
@@ -754,17 +804,18 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 	public void writeConfig() {
 		File cf;
-//		config.setCarte(config.getCarte() == null ? new Case[config.getLargeurCarte()][config.getHauteurCarte()]
-//				: config.getCarte());
+		// config.setCarte(config.getCarte() == null ? new
+		// Case[config.getLargeurCarte()][config.getHauteurCarte()]
+		// : config.getCarte());
 		cf = getConfigFile(0);
-//		System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
+		// System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
 		if (!WargameUtils.saveObjectToFile(cf, config) && JOptionPane.showConfirmDialog(null,
 				"Erreur lors de la sauvegarde de " + cf.getAbsolutePath() + ", continuer ?",
 				"Impossible de sauvegarder le jeu", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
 			System.exit(0);
 		for (int i = 0; i < MAX_SAVE; i++) {
 			cf = getConfigFile(i + 1);
-//			System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
+			// System.out.println("Ecriture de " + cf.getAbsolutePath() + "... ");
 			if (!WargameUtils.saveObjectToFile(cf, save[i]) && JOptionPane.showConfirmDialog(null,
 					"Erreur lors de la sauvegarde de " + cf.getAbsolutePath() + ", continuer ?",
 					"Impossible de sauvegarder le jeu", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
@@ -808,6 +859,26 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 
 	public void setConfig(IConfig cfg) {
 		this.config = cfg;
+	}
+
+	@Override
+	public ICase getRelativeCase(int relativePosX, int relativePosY, int unit) {
+		// on sait que:
+		// rx = y % 2 == 0 ? x * unit : (int) ((0.5000F + x) * unit);
+
+		// ry = (int) ((0.6666F * y) * unit);
+		// => ry / unit / 0.6666F = y
+		// => rx / unit = x
+		int absoluteX = (int) ((relativePosX - unit / 2) / unit);
+		int absoluteY = (int) ((relativePosY - unit / 2) / 0.6666F / unit);
+		ICase c;
+		int i, j;
+		for (i = -2; i <= 1; i++)
+			for (j = -1; j <= 1; j++)
+				if ((c = getCase(absoluteX + i, absoluteY + j)) != null && WargameUtils.isInHexa(relativePosX,
+						relativePosY, c.getRelativeX(unit), c.getRelativeY(unit), unit, unit))
+					return c;
+		return null;
 	}
 
 }

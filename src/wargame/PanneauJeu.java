@@ -59,12 +59,18 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	/**
 	 * Dessine une fleche sur un {@link Graphics}
 	 * 
-	 * @param g      le graphique
-	 * @param ox     coord x de l'origine
-	 * @param oy     coord y de l'origine
-	 * @param dx     coord x de la destination
-	 * @param dy     coord y de la destination
-	 * @param taille taille des pointes
+	 * @param g
+	 *            le graphique
+	 * @param ox
+	 *            coord x de l'origine
+	 * @param oy
+	 *            coord y de l'origine
+	 * @param dx
+	 *            coord x de la destination
+	 * @param dy
+	 *            coord y de la destination
+	 * @param taille
+	 *            taille des pointes
 	 */
 	public static void dessinerFleche(Graphics g, int ox, int oy, int dx, int dy, int taille) {
 		int x, y;
@@ -141,8 +147,10 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	/**
 	 * Place la camera de jeu sur une position (x, y) (au centre)
 	 * 
-	 * @param x coord x
-	 * @param y coord y
+	 * @param x
+	 *            coord x
+	 * @param y
+	 *            coord y
 	 */
 	public void lookAt(int x, int y) {
 		int unit = getUnit();
@@ -154,19 +162,21 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 			translateY = -0.6666F * (y - (float) getHeight() / unit / 2);
 		}
 	}
-	
+
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if (originDragPoint != null) {
 			int unit = getUnit();
 			float newTranslateX = (float) (originTranslateX + (e.getX() - originDragPoint.getX()) / unit);
 			float newTranslateY = (float) (originTranslateY + (e.getY() - originDragPoint.getY()) / unit);
-			if (!((newTranslateX <= 1) ^ (-newTranslateX + (float) getWidth() / unit <= carte.getLargeur() + 1.5F)))
-				translateX = newTranslateX;
+			// if (!((newTranslateX <= 1) ^ (-newTranslateX + (float) getWidth() / unit <=
+			// carte.getLargeur() + 1.5F)))
+			translateX = newTranslateX;
 
-			if (!((newTranslateY <= 1)
-					^ (-newTranslateY + (float) getHeight() / unit <= (carte.getHauteur() + 2) * 0.6666F)))
-				translateY = newTranslateY;
+			// if (!((newTranslateY <= 1)
+			// ^ (-newTranslateY + (float) getHeight() / unit <= (carte.getHauteur() + 2) *
+			// 0.6666F)))
+			translateY = newTranslateY;
 
 		}
 		mouseMoved(e);
@@ -209,9 +219,12 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 	/**
 	 * Zoom a partir d'une position de souris
 	 * 
-	 * @param mouseX posX de la souris à l'écran
-	 * @param mouseY posY de la souris à l'écran
-	 * @param factor facteur de zoom
+	 * @param mouseX
+	 *            posX de la souris à l'écran
+	 * @param mouseY
+	 *            posY de la souris à l'écran
+	 * @param factor
+	 *            facteur de zoom
 	 */
 	public void zoom(int mouseX, int mouseY, float factor) {
 		// on cherche le nouveau zoom
@@ -234,29 +247,6 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		this.translateY = -centerOfZoomY + centerY / newUnit;
 
 		repaint();
-	}
-
-	/**
-	 * Vrai si la souris est dans un hexagone de taille (x, y, w, h) faux sinon
-	 * 
-	 * @param x coord x
-	 * @param y coord y
-	 * @param w largeur
-	 * @param h hauteur
-	 * @return vrai si la souris est dans l'hexagone, faux sinon
-	 */
-	private boolean isInHexa(int x, int y, int w, int h) {
-		if (mouseX > x && mouseY > y && mouseX < x + w && mouseY < y + h) {
-			int rMouseY = mouseY - y;
-			if (rMouseY < w * 2 / 3)
-				if (rMouseY > w / 3)
-					return true;
-				else
-					rMouseY = w / 3 - rMouseY;
-			int rMouseX = Math.abs(mouseX - x - w / 2);
-			return rMouseY < -h * rMouseX / w + h;
-		}
-		return false;
 	}
 
 	@Override
@@ -287,18 +277,12 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		for (int i = translateXStart; i < translateXEnd; i++)
 			for (int j = translateYStart; j < translateYEnd; j++) {
 				c = carte.getCase(i, j);
-				if (j % 2 == 0) {
-					x = i * unit;
-					y = (int) ((0.6666F * j) * unit);
-				} else {
-					x = (int) ((0.5000F + i) * unit);
-					y = (int) ((0.6666F * j) * unit);
-				}
 
 				if (c == null) {
-					g.drawImage(INVISIBLE_HL.getImageFromPosition(i, j), x, y, unit, unit, this);
 					continue;
 				}
+				x = c.getRelativeX(unit);
+				y = c.getRelativeY(unit);
 				e = c.getElement();
 				if (c.isVisible()) {
 					if (e != null) { // Obstacle ou soldat
@@ -316,10 +300,10 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 				} else
 					g.drawImage(INVISIBLE.getImageFromPosition(i, j), x, y, unit, unit, this);
 
-				if (carte.getSoldatClick() != null && !c.isAccessible())
+				if (carte.getSoldatClick() != null && !c.isTirable())
 					g.drawImage(INACCESSIBLE.getImageFromPosition(i, j), x, y, unit, unit, this);
 
-				if (!dedans && isInHexa(translateX + x, translateY + y, unit, unit)) {
+				if (!dedans && WargameUtils.isInHexa(mouseX, mouseY, translateX + x, translateY + y, unit, unit)) {
 					dedans = true;
 					carte.setHoveredCase(c);
 					g.drawImage(HOVER.getImages()[0], x, y, unit, unit, this);

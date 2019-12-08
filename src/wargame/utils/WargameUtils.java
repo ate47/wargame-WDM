@@ -17,10 +17,14 @@ public class WargameUtils {
 	/**
 	 * dessine la chaine s centrée en (x,y)
 	 * 
-	 * @param g le graphics où dessiner
-	 * @param x coord x où dessiner
-	 * @param y coord y où dessiner
-	 * @param s la chaine à dessiner
+	 * @param g
+	 *            le graphics où dessiner
+	 * @param x
+	 *            coord x où dessiner
+	 * @param y
+	 *            coord y où dessiner
+	 * @param s
+	 *            la chaine à dessiner
 	 */
 	public static void drawCenter(Graphics g, int x, int y, String s) {
 		Rectangle2D text = g.getFontMetrics(g.getFont()).getStringBounds(s, g);
@@ -30,10 +34,13 @@ public class WargameUtils {
 	/**
 	 * recherche un element dans un tableau modulo sa taille
 	 * 
-	 * @param array le tableau où chercher
-	 * @param seed  l'indice modulo la taille du tableau dans le tableau
+	 * @param array
+	 *            le tableau où chercher
+	 * @param seed
+	 *            l'indice modulo la taille du tableau dans le tableau
 	 * @return un element du tableau
-	 * @param <T> le type du tableau
+	 * @param <T>
+	 *            le type du tableau
 	 */
 	public static <T> T getFromSeed(T[] array, int seed) {
 		int index = seed % array.length;
@@ -43,7 +50,38 @@ public class WargameUtils {
 
 		return array[index % array.length];
 	}
-	
+
+	/**
+	 * Vrai si la souris est dans un hexagone de taille (x, y, w, h) faux sinon
+	 * 
+	 * @param mouseX
+	 *            la position de la souris X
+	 * @param mouseY
+	 *            la position de la souris Y
+	 * @param x
+	 *            coord x
+	 * @param y
+	 *            coord y
+	 * @param w
+	 *            largeur
+	 * @param h
+	 *            hauteur
+	 * @return vrai si la souris est dans l'hexagone, faux sinon
+	 */
+	public static boolean isInHexa(int mouseX, int mouseY, int x, int y, int w, int h) {
+		if (mouseX > x && mouseY > y && mouseX < x + w && mouseY < y + h) {
+			int rMouseY = mouseY - y;
+			if (rMouseY < w * 2 / 3)
+				if (rMouseY > w / 3)
+					return true;
+				else
+					rMouseY = w / 3 - rMouseY;
+			int rMouseX = Math.abs(mouseX - x - w / 2);
+			return rMouseY < -h * rMouseX / w + h;
+		}
+		return false;
+	}
+
 	public static Object readObjectFromFile(File file) {
 		try (FileInputStream in = new FileInputStream(file)) {
 			ObjectInputStream ois = new ObjectInputStream(in);
@@ -65,6 +103,7 @@ public class WargameUtils {
 		}
 	}
 
-	private WargameUtils() {}
+	private WargameUtils() {
+	}
 
 }

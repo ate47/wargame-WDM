@@ -13,6 +13,12 @@ import javax.swing.JPanel;
 import wargame.ListenerAdapter;
 import wargame.assets.IIconObject;
 
+/**
+ * Panel de selection d'objet
+ *
+ * @param <T>
+ *            le type de l'objet
+ */
 public class SelectionButtonsPanel<T extends IIconObject> extends JPanel implements ListenerAdapter {
 	private class OnClickListener implements ActionListener {
 		T t;
@@ -36,19 +42,18 @@ public class SelectionButtonsPanel<T extends IIconObject> extends JPanel impleme
 	private MenuButton[] buttons;
 	private JLabel label;
 
-	private void resizeButtons() {
-		int size = 4 * getHeight() / 5;
-		int decalage = size / 10;
-		int top = getHeight() - size;
-		int left = (getWidth() - size * buttons.length - decalage * (buttons.length - 1)) / 2;
-		for (int i = 0; i < buttons.length; i++) {
-			buttons[i].setBounds(left + (size + decalage) * i, top, size, size);
-		}
-		buttons[getter.get().ordinal()].setUtilise(true);
-		label.setBounds(0, 0, getWidth(), getHeight() - size - 3);
-		addComponentListener(this);
-	}
-
+	/**
+	 * Construit un selecteur
+	 * 
+	 * @param array
+	 *            le tableau des elements a sauvegardé
+	 * @param name
+	 *            le nom a affiché
+	 * @param setter
+	 *            comment definir l'element
+	 * @param getter
+	 *            comment obtenir l'element courant
+	 */
 	public SelectionButtonsPanel(T[] array, String name, Consumer<T> setter, Supplier<T> getter) {
 		this.buttons = new MenuButton[array.length];
 		this.setter = setter;
@@ -70,6 +75,19 @@ public class SelectionButtonsPanel<T extends IIconObject> extends JPanel impleme
 	@Override
 	public void componentResized(ComponentEvent e) {
 		resizeButtons();
+	}
+
+	private void resizeButtons() {
+		int size = 4 * getHeight() / 5;
+		int decalage = size / 10;
+		int top = getHeight() - size;
+		int left = (getWidth() - size * buttons.length - decalage * (buttons.length - 1)) / 2;
+		for (int i = 0; i < buttons.length; i++) {
+			buttons[i].setBounds(left + (size + decalage) * i, top, size, size);
+		}
+		buttons[getter.get().ordinal()].setUtilise(true);
+		label.setBounds(0, 0, getWidth(), getHeight() - size - 3);
+		addComponentListener(this);
 	}
 
 }

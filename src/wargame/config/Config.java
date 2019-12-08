@@ -8,9 +8,13 @@ import wargame.ICase;
 import wargame.Soldat;
 import wargame.Wargame.FinJeu;
 
+/**
+ * Une implementation d'une config de jeu
+ *
+ */
 public class Config implements IConfig, Serializable {
 	private static final long serialVersionUID = 9194042623694545614L;
-	private static final int vieParRegen = 70;
+	private static final int vieParRegen = 50;
 	private boolean showFps = false;
 	private int largeurCarte = 25;
 	private int hauteurCarte = 30;
@@ -25,6 +29,9 @@ public class Config implements IConfig, Serializable {
 	private Soldat[] soldatEnnemis;
 	private ICase[][] carte;
 
+	/**
+	 * Construction d'une config vide
+	 */
 	public Config() {
 		soldatJoueur = new Soldat[factionJoueur.nombreGenere()];
 		soldatEnnemis = new Soldat[factionEnnemi.nombreGenere()];
@@ -79,6 +86,7 @@ public class Config implements IConfig, Serializable {
 		return difficulty;
 	}
 
+	@Override
 	public Faction getFactionEnnemi() {
 		return factionEnnemi;
 	}
@@ -113,19 +121,16 @@ public class Config implements IConfig, Serializable {
 		return pourcentageObstacle;
 	}
 
+	@Override
 	public Soldat[] getSoldatEnnemis() {
 		return soldatEnnemis;
 	}
 
+	@Override
 	public Soldat[] getSoldatJoueur() {
 		return soldatJoueur;
 	}
-
-	@Override
-	public int getVieparregen() {
-		return vieParRegen;
-	}
-
+	
 	@Override
 	public int getVieParRegen() {
 		return vieParRegen;
@@ -133,11 +138,6 @@ public class Config implements IConfig, Serializable {
 
 	@Override
 	public boolean isShowFps() {
-		return showFps;
-	}
-
-	@Override
-	public boolean isShowingFPS() {
 		return showFps;
 	}
 

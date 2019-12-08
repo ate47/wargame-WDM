@@ -29,21 +29,18 @@ import wargame.menu.MenuPause;
 import wargame.menu.PanelMenu;
 import wargame.utils.WargameUtils;
 
+/**
+ * Represente le jeu et ses objets
+ */
 public class Wargame implements ICarte, KeyEventDispatcher {
-	public enum FinJeu {
-		GAGNE, PERDU, EN_COURS
-	}
-
+	/**
+	 * Une case en jeu (ou une position)
+	 */
 	public static class Case implements ICase, Serializable {
 		private static final long serialVersionUID = 4868404777608031114L;
 		private boolean visible, visite, accessible, tirable;
 		private Element e;
 		private int x, y;
-
-		@Override
-		public Case clone() {
-			return new Case(this);
-		}
 
 		private Case(Case old) {
 			visible = old.visible;
@@ -61,6 +58,14 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 			y = old.y;
 		}
 
+		/**
+		 * Construit une case avec ces coordonnées
+		 * 
+		 * @param x
+		 *            pos x
+		 * @param y
+		 *            pos y
+		 */
 		public Case(int x, int y) {
 			this.x = x;
 			this.y = y;
@@ -141,6 +146,11 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		}
 
 		@Override
+		public Case clone() {
+			return new Case(this);
+		}
+
+		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
@@ -187,6 +197,11 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		}
 
 		@Override
+		public boolean isTirable() {
+			return tirable;
+		}
+
+		@Override
 		public boolean isVisible() {
 			return visible;
 		}
@@ -196,6 +211,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 			return visite;
 		}
 
+		@Override
 		public void setAccessible(boolean accessible) {
 			this.accessible = accessible;
 		}
@@ -205,6 +221,11 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 			this.e = e;
 			if (e != null)
 				e.setPosition(this);
+		}
+
+		@Override
+		public void setTirable(boolean tirable) {
+			this.tirable = tirable;
 		}
 
 		@Override
@@ -226,16 +247,24 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		public Case[] visible(int portee, boolean colision) {
 			return instance.visible(getX(), getY(), portee, colision);
 		}
+	}
 
-		@Override
-		public boolean isTirable() {
-			return tirable;
-		}
-
-		@Override
-		public void setTirable(boolean tirable) {
-			this.tirable = tirable;
-		}
+	/**
+	 * Valeur de retour de la fonction {@link Wargame#getCourant()}
+	 */
+	public enum FinJeu {
+		/**
+		 * On a gagné
+		 */
+		GAGNE,
+		/**
+		 * On a perdu
+		 */
+		PERDU,
+		/**
+		 * On est toujours là
+		 */
+		EN_COURS
 	}
 
 	/**
@@ -260,7 +289,7 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 				public void paint(Graphics g) {
 					startFrame();
 					super.paint(g);
-					if (config.isShowingFPS()) {
+					if (config.isShowFps()) {
 						g.setColor(Color.white);
 						g.drawString("Fps: " + getFps(), 0, g.getFont().getSize());
 					}
@@ -294,27 +323,33 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	private Soldat soldat;
 	private ICase hoveredCase;
 
+	/**
+	 * Jeu de base
+	 */
 	public Wargame() {
 		instance = this;
+
+		// La fenetre
 		frame = new GameFrame("Wargame");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationByPlatform(true);
 		frame.setSize(800, 600);
 
+		// Le panneau de jeu
 		panneau = new PanneauJeu(this);
 		panneau.setPreferredSize(frame.getSize());
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
-
+		// Menu de base
 		menu = new MenuJeu(this);
-		menu.setPreferredSize(frame.getSize());
-
+		// Menu de pause
 		menuPause = new MenuPause(this);
-
+		// Menu de fin
 		menuFin = new MenuFin(this);
 
+		menu.setPreferredSize(frame.getSize());
 		showMenu(menu);
 
 		frame.setIconImage(new ImageAsset("ico.png").getImages()[0]);
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
 	}
 
 	@Override
@@ -322,6 +357,13 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		ICase c = config.getCarte()[x][y];
 		c.setElement(e);
 		e.setPosition(c);
+	}
+
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent e) {
+		if (frame.getContentPane() == panneau)
+			panneau.onKey(e.getKeyCode());
+		return false;
 	}
 
 	@Override
@@ -449,8 +491,32 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		return config.getCarte()[posX][posY];
 	}
 
+	/**
+	 * @return la configuration courante
+	 */
 	public IConfig getConfig() {
 		return config;
+	}
+
+	/**
+	 * Trouve un fichier pour un num de configuration
+	 * 
+	 * @param number
+	 *            le numero de la sauvegarde
+	 * @return le fichier de sauvegarde
+	 */
+	private File getConfigFile(int number) {
+		File wargame = new File("wargame");
+		if (!wargame.exists())
+			wargame.mkdirs();
+		return new File(wargame, "save" + number + ".cfg");
+	}
+
+	/**
+	 * @return l'état du jeu
+	 */
+	public FinJeu getCourant() {
+		return config.getCourant();
 	}
 
 	@Override
@@ -458,6 +524,9 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		return getCase(posX, posY).getElement();
 	}
 
+	/**
+	 * @return les FPS courants
+	 */
 	public float getFps() {
 		return fps;
 	}
@@ -486,18 +555,23 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		return config.getLargeurCarte();
 	}
 
+	/**
+	 * @return le menu principal
+	 */
 	public MenuJeu getMenu() {
 		return menu;
 	}
 
+	/**
+	 * @return le menu de fin
+	 */
 	public MenuFin getMenuFin() {
 		return menuFin;
 	}
 
-	public SavedConfig[] getSave() {
-		return save;
-	}
-
+	/**
+	 * @return le menu de pause
+	 */
 	public MenuPause getMenuPause() {
 		return menuPause;
 	}
@@ -507,8 +581,38 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		return panneau;
 	}
 
+	/**
+	 * @return le tick partial
+	 */
 	public float getPartialTick() {
 		return partialTick;
+	}
+
+	@Override
+	public ICase getRelativeCase(int relativePosX, int relativePosY, int unit) {
+		// on sait que:
+		// rx = y % 2 == 0 ? x * unit : (int) ((0.5000F + x) * unit);
+
+		// ry = (int) ((0.6666F * y) * unit);
+		// => ry / unit / 0.6666F = y
+		// => rx / unit = x
+		int absoluteX = (int) ((relativePosX - unit / 2) / unit);
+		int absoluteY = (int) ((relativePosY - unit / 2) / 0.6666F / unit);
+		ICase c;
+		int i, j;
+		for (i = -2; i <= 1; i++)
+			for (j = -1; j <= 1; j++)
+				if ((c = getCase(absoluteX + i, absoluteY + j)) != null && WargameUtils.isInHexa(relativePosX,
+						relativePosY, c.getRelativeX(unit), c.getRelativeY(unit), unit, unit))
+					return c;
+		return null;
+	}
+
+	/**
+	 * @return les sauvegardes
+	 */
+	public SavedConfig[] getSave() {
+		return save;
 	}
 
 	@Override
@@ -526,16 +630,36 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		return config.getSoldatJoueur();
 	}
 
-	public File getConfigFile(int number) {
-		File wargame = new File("wargame");
-		if (!wargame.exists())
-			wargame.mkdirs();
-		return new File(wargame, "save" + number + ".cfg");
-	}
-
 	@Override
 	public Case[] getVisibles() {
 		return visibles;
+	}
+
+	/**
+	 * Joue l'IA des ennemis
+	 */
+	public void jouerIA() {
+		int nombreIA = 0;
+		// On place leurs choix
+		for (ISoldat s : getSoldatEnnemis())
+			s.choixIA();
+
+		// On execute
+		for (ISoldat s : getSoldatEnnemis()) {
+			s.joueTour(config);
+			// en regardant si il ne meurt pas
+			if (!s.estMort())
+				nombreIA++;
+		}
+
+		// on regarde si il nous reste des ennemis
+		if (nombreIA == 0) {
+			config.setCourant(FinJeu.GAGNE);
+			// si oui, on affiche le menu de fin
+			showMenu(getMenuFin());
+		}
+
+		panneau.repaint();
 	}
 
 	@Override
@@ -568,27 +692,6 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		panneau.repaint();
 	}
 
-	public FinJeu getCourant() {
-		return config.getCourant();
-	}
-
-	public void lancerJeu() {
-		readConfig();
-
-		frame.pack();
-		frame.setVisible(true);
-		MUSIQUE_JEU.loop();
-
-		/* sync des fps */
-		new Timer(1000 / 60, new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				frame.repaint();
-			}
-		}).start();
-	}
-
 	/**
 	 * Lance la configuration de jeu
 	 * 
@@ -610,6 +713,26 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 	}
 
 	/**
+	 * Lancer le jeu
+	 */
+	public void lancerJeu() {
+		readConfig();
+
+		frame.pack();
+		frame.setVisible(true);
+		MUSIQUE_JEU.loop();
+
+		/* sync des fps */
+		new Timer(1000 / 60, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frame.repaint();
+			}
+		}).start();
+	}
+
+	/**
 	 * Supprime un soldat du jeu (vÃ©rifier avant si Ã§a vie < 0)
 	 * 
 	 * @param soldat
@@ -625,6 +748,9 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		return 3 * portee * (portee + 1) + 1;
 	}
 
+	/**
+	 * Lecture des fichiers de sauvegarde
+	 */
 	public void readConfig() {
 		save = new SavedConfig[MAX_SAVE];
 		File cf;
@@ -667,13 +793,30 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		writeConfig();
 	}
 
+	/**
+	 * definir la config courante sans copie
+	 * 
+	 * @param cfg
+	 *            la configuration à placer
+	 */
+	public void setConfig(IConfig cfg) {
+		this.config = cfg;
+	}
+
 	@Override
 	public void setHoveredCase(ICase hoveredCase) {
 		this.hoveredCase = hoveredCase;
 	}
 
+	/**
+	 * Affiche un panel
+	 * 
+	 * @param panel
+	 *            le panel
+	 */
 	public void showMenu(JPanel panel) {
 		panel.setSize(frame.getRootPane().getSize());
+		// Reinit pour les panneaux speciaux
 		if (panel instanceof PanelMenu) {
 			PanelMenu pnl = (PanelMenu) panel;
 			pnl.removeAll();
@@ -683,11 +826,31 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		frame.repaint();
 	}
 
-	public boolean tousMort(Soldat lesSoldats[]) {
-		for (Soldat s : lesSoldats) {
-			if (!s.estMort()) {
+	/**
+	 * Calcul FPS/TickPartiel
+	 */
+	private void startFrame() {
+		long debFPSTime = lastFPSTime;
+		lastFPSTime = System.currentTimeMillis();
+		partialTick = (lastFPSTime - debFPSTime) / 1000F;
+		fps = (1 / partialTick);
+	}
+
+	@Override
+	public boolean traverseValide(ICase pos1, ICase pos2) {
+		int unit = 80;
+		int vectAX = pos1.getRelativeX(unit) + unit / 2, vectAY = pos1.getRelativeY(unit) + unit / 2;
+		int vectBX = pos2.getRelativeX(unit) + unit / 2, vectBY = pos2.getRelativeY(unit) + unit / 2;
+		double granul = 10 * Math.sqrt((vectAX - vectBX) * (vectAX - vectBX) + (vectAY - vectBY) * (vectAY - vectBY)),
+				k;
+
+		int vectXX, vectXY;
+		ICase c;
+		for (k = 0; k < granul; k++) {
+			vectXX = (int) ((1 - k / granul) * vectAX + k / granul * vectBX);
+			vectXY = (int) ((1 - k / granul) * vectAY + k / granul * vectBY);
+			if ((c = getRelativeCase(vectXX, vectXY, unit)) != null && c != pos1 && c != pos2 && c.getElement() != null)
 				return false;
-			}
 		}
 		return true;
 	}
@@ -755,28 +918,10 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		}
 	}
 
+	@Override
 	public Case[] visible(int x, int y, int portee, boolean colision) {
 		Case[] cases = new Case[nombreVisible(portee)];
 		return (Case[]) visible(x, y, portee, colision, cases);
-	}
-
-	@Override
-	public boolean traverseValide(ICase pos1, ICase pos2) {
-		int unit = 80;
-		int vectAX = pos1.getRelativeX(unit) + unit / 2, vectAY = pos1.getRelativeY(unit) + unit / 2;
-		int vectBX = pos2.getRelativeX(unit) + unit / 2, vectBY = pos2.getRelativeY(unit) + unit / 2;
-		double granul = 10 * Math.sqrt((vectAX - vectBX) * (vectAX - vectBX) + (vectAY - vectBY) * (vectAY - vectBY)),
-				k;
-
-		int vectXX, vectXY;
-		ICase c;
-		for (k = 0; k < granul; k++) {
-			vectXX = (int) ((1 - k / granul) * vectAX + k / granul * vectBX);
-			vectXY = (int) ((1 - k / granul) * vectAY + k / granul * vectBY);
-			if ((c = getRelativeCase(vectXX, vectXY, unit)) != null && c != pos1 && c != pos2 && c.getElement() != null)
-				return false;
-		}
-		return true;
 	}
 
 	@Override
@@ -802,6 +947,9 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 		return cases;
 	}
 
+	/**
+	 * Ecrire les configurations
+	 */
 	public void writeConfig() {
 		File cf;
 		// config.setCarte(config.getCarte() == null ? new
@@ -821,64 +969,6 @@ public class Wargame implements ICarte, KeyEventDispatcher {
 					"Impossible de sauvegarder le jeu", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
 				System.exit(0);
 		}
-	}
-
-	public void jouerIA() {
-		int nombreIA = 0;
-		for (ISoldat s : getSoldatEnnemis())
-			s.choixIA();
-
-		for (ISoldat s : getSoldatEnnemis()) {
-			s.joueTour(config);
-			if (!s.estMort())
-				nombreIA++;
-		}
-
-		if (nombreIA == 0) {
-			config.setCourant(FinJeu.GAGNE);
-
-			showMenu(getMenuFin());
-		}
-
-		panneau.repaint();
-	}
-
-	private void startFrame() {
-		long debFPSTime = lastFPSTime;
-		lastFPSTime = System.currentTimeMillis();
-		partialTick = (lastFPSTime - debFPSTime) / 1000F;
-		fps = (1 / partialTick);
-	}
-
-	@Override
-	public boolean dispatchKeyEvent(KeyEvent e) {
-		if (frame.getContentPane() == panneau)
-			panneau.onKey(e.getKeyCode());
-		return false;
-	}
-
-	public void setConfig(IConfig cfg) {
-		this.config = cfg;
-	}
-
-	@Override
-	public ICase getRelativeCase(int relativePosX, int relativePosY, int unit) {
-		// on sait que:
-		// rx = y % 2 == 0 ? x * unit : (int) ((0.5000F + x) * unit);
-
-		// ry = (int) ((0.6666F * y) * unit);
-		// => ry / unit / 0.6666F = y
-		// => rx / unit = x
-		int absoluteX = (int) ((relativePosX - unit / 2) / unit);
-		int absoluteY = (int) ((relativePosY - unit / 2) / 0.6666F / unit);
-		ICase c;
-		int i, j;
-		for (i = -2; i <= 1; i++)
-			for (j = -1; j <= 1; j++)
-				if ((c = getCase(absoluteX + i, absoluteY + j)) != null && WargameUtils.isInHexa(relativePosX,
-						relativePosY, c.getRelativeX(unit), c.getRelativeY(unit), unit, unit))
-					return c;
-		return null;
 	}
 
 }

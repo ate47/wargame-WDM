@@ -4,7 +4,10 @@ import java.io.Serializable;
 
 import wargame.config.IConfig;
 
-public interface ISoldat extends Serializable{
+/**
+ * Soldat dans le jeu
+ */
+public interface ISoldat extends Serializable {
 	/**
 	 * Valeur de retour de {@link ISoldat#getProchainMouvement()}
 	 */
@@ -36,7 +39,8 @@ public interface ISoldat extends Serializable{
 	/**
 	 * Attaque un autre soldat
 	 * 
-	 * @param soldat le soldat
+	 * @param soldat
+	 *            le soldat
 	 */
 	void combat(ISoldat soldat);
 
@@ -78,14 +82,16 @@ public interface ISoldat extends Serializable{
 	/**
 	 * Joue le tour du soldat
 	 * 
-	 * @param cfg la configuration de jeu à suivre
+	 * @param cfg
+	 *            la configuration de jeu à suivre
 	 */
 	void joueTour(IConfig cfg);
 
 	/**
 	 * Demande un combat de ce soldat avec une cible pour le prochain tour
 	 * 
-	 * @param enemi la cible
+	 * @param enemi
+	 *            la cible
 	 * @throws IllegalMoveException
 	 */
 
@@ -94,8 +100,10 @@ public interface ISoldat extends Serializable{
 	/**
 	 * demande un deplacement de ce soldat pour le prochain tour
 	 * 
-	 * @param newPos la nouvelle position
-	 * @throws IllegalMoveException si la position n'est pas valide
+	 * @param newPos
+	 *            la nouvelle position
+	 * @throws IllegalMoveException
+	 *             si la position n'est pas valide
 	 */
 	void seDeplace(ICase newPos) throws IllegalMoveException;
 

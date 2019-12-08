@@ -8,6 +8,15 @@ import wargame.config.IConfig;
 public class Soldat extends Element implements ISoldat {
 	private static final long serialVersionUID = 4490497910854130663L;
 
+	/**
+	 * Recherche un soldat dans des cases
+	 * 
+	 * @param tableau
+	 *            les cases
+	 * @param element
+	 *            le soldat à chercher
+	 * @return vrai si il est dedans, faux sinon
+	 */
 	public static boolean rechercheSequentielle(ICase[] tableau, Soldat element) {
 		for (ICase c : tableau) {
 			if (c != null && element.equals(c.getElement()))
@@ -23,6 +32,12 @@ public class Soldat extends Element implements ISoldat {
 
 	private SoldatProchainMouvement mouvement = SoldatProchainMouvement.RIEN;
 
+	/**
+	 * Créer un soldat avec un type
+	 * 
+	 * @param type
+	 *            le type du soldat
+	 */
 	public Soldat(IType type) {
 		super(type);
 		this.type = type;
@@ -163,7 +178,7 @@ public class Soldat extends Element implements ISoldat {
 	}
 
 	/**
-	 * RÃ©alise le choix de l'IA
+	 * Réalise le choix de l'IA
 	 */
 	public void choixIA() {
 		ICase[] vision;

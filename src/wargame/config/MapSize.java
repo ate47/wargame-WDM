@@ -3,8 +3,26 @@ package wargame.config;
 import wargame.assets.IIconObject;
 import wargame.assets.ImageAsset;
 
+/**
+ * Represente une taille de jeu
+ */
 public enum MapSize implements IIconObject {
-	LITTLE(0.5F), NORMAL(1F), BIG(1.5F), HUGE(2F);
+	/**
+	 * petit
+	 */
+	LITTLE(0.5F),
+	/**
+	 * normal
+	 */
+	NORMAL(1F),
+	/**
+	 * gros
+	 */
+	BIG(1.5F),
+	/**
+	 * enorme
+	 */
+	HUGE(2F);
 
 	private float factor;
 	private ImageAsset icon, iconHover;
@@ -15,6 +33,9 @@ public enum MapSize implements IIconObject {
 		this.iconHover = new ImageAsset("map/size_" + name().toLowerCase() + "_hover.png");
 	}
 
+	/**
+	 * @return le facteur de croissance de la taille
+	 */
 	public float getFactor() {
 		return factor;
 	}

@@ -12,6 +12,9 @@ import wargame.assets.ImageAsset;
 import wargame.assets.SoundAsset;
 import wargame.utils.WargameUtils;
 
+/**
+ * Répresente un bouton dans le menu
+ */
 public class MenuButton extends JButton implements MouseListener {
 
 	private static final long serialVersionUID = 1175305120107911940L;
@@ -31,6 +34,21 @@ public class MenuButton extends JButton implements MouseListener {
 	private Color text;
 	private Color textHover;
 
+	/**
+	 * Construit un bouton
+	 * 
+	 * @param texte
+	 *            le texte du bouton
+	 * @param image
+	 *            l'image de fond (ou null si aucune)
+	 * @param imageHover
+	 *            l'image de fond quand la souris est dessus (ou null même que sans
+	 *            souris)
+	 * @param text
+	 *            la couleur du texte
+	 * @param textHover
+	 *            la couleur du texte quand la souris est dessus
+	 */
 	public MenuButton(String texte, ImageAsset image, ImageAsset imageHover, Color text, Color textHover) {
 		super(texte);
 		this.image = image;
@@ -41,16 +59,34 @@ public class MenuButton extends JButton implements MouseListener {
 		addMouseListener(this);
 	}
 
+	/**
+	 * Construit un bouton avec des couleurs de texte par defaut
+	 * 
+	 * @param texte
+	 *            le texte du bouton
+	 * @param image
+	 *            l'image de fond (ou null si aucune)
+	 * @param imageHover
+	 *            l'image de fond quand la souris est dessus (ou null même que sans
+	 *            souris)
+	 */
 	public MenuButton(String texte, ImageAsset image, ImageAsset imageHover) {
 		this(texte, image, imageHover, FOREGROUND, FOREGROUND_HOVER);
 	}
 
+	/**
+	 * Construit un bouton avec un fond par defaut
+	 * 
+	 * @param texte
+	 *            le texte du bouton
+	 */
 	public MenuButton(String texte) {
 		this(texte, BUTTON_IMAGE, BUTTON_IMAGE_HOVER);
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {}
+	public void mouseClicked(MouseEvent e) {
+	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -75,6 +111,12 @@ public class MenuButton extends JButton implements MouseListener {
 		repaint();
 	}
 
+	/**
+	 * définir si on utilise ce bouton
+	 * 
+	 * @param b
+	 *            si on utilise ce bouton
+	 */
 	public void setUtilise(boolean b) {
 		used = b;
 		repaint();
@@ -84,7 +126,7 @@ public class MenuButton extends JButton implements MouseListener {
 	protected void paintComponent(Graphics g) {
 		Color text;
 		if (image != null) {
-			if (mouseIn) {
+			if (mouseIn && isEnabled()) {
 				if (imageHover == null) {
 					g.drawImage((image).getImageFromTime(), 0, 0, getWidth() - 1, getHeight() - 1, null);
 					g.setColor(HOVER);
@@ -106,7 +148,7 @@ public class MenuButton extends JButton implements MouseListener {
 			WargameUtils.drawCenter(g, getWidth() / 2, getHeight() / 2, getText());
 			g.setFont(old);
 		}
-		
+
 		if (used) {
 			g.setColor(SELECTED);
 			g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);

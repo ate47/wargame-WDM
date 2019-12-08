@@ -13,19 +13,18 @@ public abstract class Element implements Serializable, Cloneable {
 	private IImagedObject asset;
 	private ICase position;
 
+	/**
+	 * Element représenté par une image
+	 * 
+	 * @param asset
+	 *            l'image de l'objet
+	 */
 	public Element(IImagedObject asset) {
 		this.asset = asset;
 	}
 
-	/**
-	 * definir la position de l'element
-	 * 
-	 * @param position
-	 *            la position
-	 */
-	public void setPosition(ICase position) {
-		this.position = position;
-	}
+	@Override
+	public abstract Element clone();
 
 	/**
 	 * @return la position de l'element
@@ -41,6 +40,13 @@ public abstract class Element implements Serializable, Cloneable {
 		return asset.getImage();
 	}
 
-	@Override
-	public abstract Element clone();
+	/**
+	 * definir la position de l'element
+	 * 
+	 * @param position
+	 *            la position
+	 */
+	public void setPosition(ICase position) {
+		this.position = position;
+	}
 }

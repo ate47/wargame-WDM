@@ -20,7 +20,8 @@ import wargame.config.Faction;
 import wargame.utils.WargameUtils;
 
 /**
- * Dessinateur de faux jeu
+ * Dessinateur de faux jeu, les composants doivent être ajouté dans la méthode
+ * {@link #init()}
  */
 public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 	private static final long serialVersionUID = -6212292517967101515L;
@@ -28,6 +29,7 @@ public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 	private static double shiftX, shiftY;
 	private static double translateX, translateY;
 	static {
+		// On place une vitesse de base
 		double angle = Math.random() * Math.PI * 2;
 		double speed = Math.random() + 0.2;
 		shiftX = Math.cos(angle) * speed;
@@ -57,10 +59,22 @@ public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 		}
 	}
 
+	/**
+	 * @return le haut du menu (selon les boutons)
+	 */
 	protected int getTop() {
 		return getHeight() / 3;
 	}
 
+	/**
+	 * Ajoute un bouton
+	 * 
+	 * @param text
+	 *            le texte sur le bouton
+	 * @param listener
+	 *            quoi executer quand on clique dessus
+	 * @return le bouton
+	 */
 	protected JButton addButton(String text, Runnable listener) {
 		return addButton(text, new ActionListener() {
 
@@ -71,6 +85,15 @@ public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 		});
 	}
 
+	/**
+	 * Ajoute un bouton
+	 * 
+	 * @param text
+	 *            le texte sur le bouton
+	 * @param listener
+	 *            quoi executer quand on clique dessus
+	 * @return le bouton
+	 */
 	protected JButton addButton(String text, ActionListener listener) {
 		JButton button = new MenuButton(text);
 		button.addActionListener(listener);
@@ -78,11 +101,23 @@ public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 		return button;
 	}
 
+	/**
+	 * Ajoute un label
+	 * 
+	 * @param text
+	 *            le texte du label
+	 */
 	protected void addLabel(String text) {
 		JButton button = new MenuButton(text, null, null);
 		addComponent(button);
 	}
 
+	/**
+	 * Ajoute un component
+	 * 
+	 * @param text
+	 *            le component
+	 */
 	protected void addComponent(JComponent component) {
 		int sizeX = 2 * getWidth() / 5;
 		int sizeY = getHeight() / 10;
@@ -93,6 +128,16 @@ public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 		repaint();
 	}
 
+	/**
+	 * dessine le menu
+	 * 
+	 * @param g
+	 *            où
+	 * @param width
+	 *            largeur
+	 * @param height
+	 *            hauteur
+	 */
 	public void paint(Graphics g, int width, int height) {
 		float partialSecond = jeu.getPartialTick();
 		translateX += shiftX * partialSecond;
@@ -156,13 +201,16 @@ public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 	}
 
 	@Override
-	public void componentMoved(ComponentEvent e) {}
+	public void componentMoved(ComponentEvent e) {
+	}
 
 	@Override
-	public void componentShown(ComponentEvent e) {}
+	public void componentShown(ComponentEvent e) {
+	}
 
 	@Override
-	public void componentHidden(ComponentEvent e) {}
+	public void componentHidden(ComponentEvent e) {
+	}
 
 	@Override
 	public void removeAll() {
@@ -170,6 +218,9 @@ public abstract class PanelMenu extends JPanel implements ListenerAdapter {
 		super.removeAll();
 	}
 
+	/**
+	 * Initialise les composants du menu
+	 */
 	public abstract void init();
 
 }

@@ -61,6 +61,14 @@ public interface ICase extends Serializable, Cloneable {
 	boolean isVisite();
 
 	/**
+	 * definir si la case est accessible
+	 * 
+	 * @param accessible
+	 *            l'accessibilité
+	 */
+	void setAccessible(boolean accessible);
+
+	/**
 	 * definir l'Ã©lement sur la case
 	 * 
 	 * @param e

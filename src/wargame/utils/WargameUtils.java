@@ -8,23 +8,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 /**
- * MÃ©thodes utiles pour le jeu
+ * Méthodes utiles pour le jeu
  */
 public class WargameUtils {
 
 	/**
-	 * dessine la chaine s centrÃ©e en (x,y)
+	 * dessine la chaine s centrée en (x,y)
 	 * 
 	 * @param g
-	 *            le graphics oÃ¹ dessiner
+	 *            le graphics où dessiner
 	 * @param x
-	 *            coord x oÃ¹ dessiner
+	 *            coord x où dessiner
 	 * @param y
-	 *            coord y oÃ¹ dessiner
+	 *            coord y où dessiner
 	 * @param s
-	 *            la chaine Ã  dessiner
+	 *            la chaine à dessiner
 	 */
 	public static void drawCenter(Graphics g, int x, int y, String s) {
 		Rectangle2D text = g.getFontMetrics(g.getFont()).getStringBounds(s, g);
@@ -82,6 +83,13 @@ public class WargameUtils {
 		return false;
 	}
 
+	/**
+	 * Lire un {@link Serializable} depuis un fichier
+	 * 
+	 * @param file
+	 *            le fichier où lire
+	 * @return l'objet ou null si il y a eu une erreur
+	 */
 	public static Object readObjectFromFile(File file) {
 		try (FileInputStream in = new FileInputStream(file)) {
 			ObjectInputStream ois = new ObjectInputStream(in);
@@ -92,6 +100,14 @@ public class WargameUtils {
 		}
 	}
 
+	/**
+	 * Ecrire un {@link Serializable} dans un fichier
+	 * 
+	 * @param file
+	 *            le fichier où écrire
+	 * @param obj
+	 *            l'objet à écrire
+	 */
 	public static boolean saveObjectToFile(File file, Object obj) {
 		try (FileOutputStream out = new FileOutputStream(file)) {
 			ObjectOutputStream oos = new ObjectOutputStream(out);

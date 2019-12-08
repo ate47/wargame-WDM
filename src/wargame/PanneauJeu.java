@@ -104,6 +104,12 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 
 	private Wargame carte;
 
+	/**
+	 * Créer un panneau de jeu
+	 * 
+	 * @param jeu
+	 *            le jeu
+	 */
 	public PanneauJeu(Wargame jeu) {
 		this.carte = jeu;
 		addMouseListener(this);
@@ -409,6 +415,12 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		g.translate(-translateX, -translateY);
 	}
 
+	/**
+	 * Quand une touche est cliqué et que le menu est visible
+	 * 
+	 * @param keyCode
+	 *            la touche
+	 */
 	public void onKey(int keyCode) {
 		switch (keyCode) {
 		case KeyEvent.VK_ESCAPE:
@@ -427,6 +439,12 @@ public class PanneauJeu extends JPanel implements ListenerAdapter {
 		}
 	}
 
+	/**
+	 * Definir le zoom du panneau
+	 * 
+	 * @param zoom
+	 *            le nouveau zoom
+	 */
 	public void setZoom(float zoom) {
 		this.zoom = zoom;
 	}

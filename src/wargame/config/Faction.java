@@ -10,8 +10,7 @@ import wargame.assets.ImageAsset;
  * Represente une faction pour un soldat
  */
 public enum Faction implements IIconObject {
-	BLANC("Blanc", TypeBon.values(), 10),
-	VERT("Vert", TypeMauvais.values(), 15);
+	BLANC("Blanc", TypeBon.values(), 10), VERT("Vert", TypeMauvais.values(), 15);
 	public static Faction getRandomFaction() {
 		return values()[(int) (Math.random() * values().length)];
 	}
@@ -25,7 +24,7 @@ public enum Faction implements IIconObject {
 		this.name = name;
 		this.values = values;
 		this.nombreGenere = nombreGenere;
-		this.icon = new ImageAsset("faction/faction_"+name().toLowerCase()+".png");
+		this.icon = new ImageAsset("faction/faction_" + name().toLowerCase() + ".png");
 	}
 
 	@Override
@@ -62,6 +61,9 @@ public enum Faction implements IIconObject {
 		return nombreGenere;
 	}
 
+	/**
+	 * @return le nom de la faction
+	 */
 	public String getName() {
 		return name;
 	}

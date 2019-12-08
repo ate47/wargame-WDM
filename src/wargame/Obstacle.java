@@ -10,8 +10,22 @@ public class Obstacle extends Element {
 
 	private static final long serialVersionUID = 5726626684822956694L;
 
+	/**
+	 * Le type de l'obstacle
+	 */
 	public enum TypeObstacle implements IImagedObject {
-		ROCHER(new ImageAsset("rock0.png")), FORET(new ImageAsset("foret.png")), EAU(new ImageAsset("eau0.png"));
+		/**
+		 * Une montagne
+		 */
+		ROCHER(new ImageAsset("rock0.png")),
+		/**
+		 * Forêt
+		 */
+		FORET(new ImageAsset("foret.png")),
+		/**
+		 * Ocean / eau
+		 */
+		EAU(new ImageAsset("eau0.png"));
 		public static TypeObstacle getObstacleAlea() {
 			return values()[(int) (Math.random() * values().length)];
 		}
@@ -30,15 +44,25 @@ public class Obstacle extends Element {
 
 	private TypeObstacle TYPE;
 
+	/**
+	 * Construit un obstacle avec un type
+	 * 
+	 * @param type
+	 *            le type de l'obstacle
+	 */
 	public Obstacle(TypeObstacle type) {
 		super(type);
 		TYPE = type;
 	}
 
+	/**
+	 * Construit un obstacle aleatoire
+	 */
 	public Obstacle() {
 		this(TypeObstacle.getObstacleAlea());
 	}
 
+	@Override
 	public String toString() {
 		return "" + TYPE;
 	}

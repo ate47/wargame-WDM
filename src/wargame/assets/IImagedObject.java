@@ -1,5 +1,8 @@
 package wargame.assets;
 
+/**
+ * Objet avec une image
+ */
 public interface IImagedObject {
 
 	/**
